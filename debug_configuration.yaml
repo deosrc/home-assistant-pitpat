@@ -1,0 +1,15 @@
+default_config:
+
+logger:
+  default: warning
+  logs:
+    custom_components.tdarr: debug
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+debugpy:
+  start: true
+  # wait: true
