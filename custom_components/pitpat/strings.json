@@ -73,6 +73,9 @@
       "activity_steps": {
         "name": "Steps Today"
       },
+      "activity_distance": {
+        "name": "Distance Today"
+      },
       "activity_calories": {
         "name": "Calories Burned Today"
       }

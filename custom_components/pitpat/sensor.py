@@ -8,6 +8,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     EntityCategory,
     UnitOfEnergy,
+    UnitOfLength,
     UnitOfMass,
     UnitOfTime,
     ATTR_IDENTIFIERS,
@@ -166,6 +167,15 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement="steps",
         value_fn=lambda data: data.get('activity_today', {}).get('TotalSteps', 0),
+    ),
+    PitPatSensorEntityDescription(
+        key="activity_distance",
+        translation_key="activity_distance",
+        icon="mdi:map-marker-distance",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfLength.METERS,
+        suggested_display_precision=0,
+        value_fn=lambda data: data.get('activity_today', {}).get('TotalDistance', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_calories",
