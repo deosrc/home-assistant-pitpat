@@ -30,6 +30,9 @@ from .coordinator import PitPatDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
+def _get_monitor(data: dict) -> dict:
+    return data.get('monitor_details', {}).get('Value', {}).get('Monitor', {})
+
 @dataclass(frozen=True, kw_only=True)
 class PitPatSensorEntityDescription(SensorEntityDescription):
     value_fn: Callable[[dict], str | int | float | None]
@@ -67,6 +70,14 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.WEIGHT,
         native_unit_of_measurement='kg', # TODO: Make sure this is correct based on user settings
         value_fn=lambda data: data.get('Weight'),
+    ),
+    PitPatSensorEntityDescription(
+        key="battery_level",
+        translation_key="battery_level",
+        device_class=SensorDeviceClass.BATTERY,
+        native_unit_of_measurement='%',
+        suggested_display_precision=0,
+        value_fn=lambda data: _get_monitor(data).get('BatteryInfo', {}).get('Value', {}).get('BatteryLevelFraction') * 100,
     ),
 ]
 
@@ -137,5 +148,5 @@ class PitPatDogSensorEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], Sens
             ATTR_MANUFACTURER: MANUFACTURER,
             ATTR_SW_VERSION: self.data.get("Monitor", {}).get("FirmwareVersion", ""),
             ATTR_HW_VERSION: self.data.get("Monitor", {}).get("HardwareVersion", ""),
-            ATTR_SERIAL_NUMBER: self.data.get('monitor_details', {}).get('Value', {}).get('Monitor', {}).get('SerialNumber')
+            ATTR_SERIAL_NUMBER: _get_monitor(self.data).get('SerialNumber')
         }

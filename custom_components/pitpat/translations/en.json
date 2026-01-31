@@ -39,6 +39,9 @@
       },
       "weight": {
         "name": "Weight"
+      },
+      "battery_level": {
+        "name": "Battery Level"
       }
     }
   }
