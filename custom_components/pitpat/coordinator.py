@@ -43,10 +43,16 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         base_details = self.dogs[dog_id]
 
         monitor_details = await self._api_client.async_get_monitor(dog_id)
+        all_activity_days = await self._api_client.async_get_all_activity_days(dog_id)
+
+        activity_today = None
+        if (len(all_activity_days) > 0):
+            activity_today = sorted(all_activity_days, key=lambda item: item.get('Date'), reverse=True)[0]
 
         return {
             **base_details,
             **{
-                'monitor_details': monitor_details
+                'monitor_details': monitor_details,
+                'activity_today': activity_today,
             }
         }
