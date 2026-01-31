@@ -7,7 +7,7 @@ from homeassistant.config_entries import (
 )
 
 from .const import (
-    UPDATE_INTERVAL,
+    OPTIONS_KEY_UPDATE_INTERVAL,
     UPDATE_INTERVAL_DEFAULT,
 )
 
@@ -15,7 +15,7 @@ _LOGGER = logging.getLogger(__name__)
 
 OPTIONS_SCHEMA = vol.Schema(
     {
-        vol.Required(UPDATE_INTERVAL, default=UPDATE_INTERVAL_DEFAULT): vol.All(vol.Coerce(int), vol.Range(min=1)),
+        vol.Required(OPTIONS_KEY_UPDATE_INTERVAL, default=UPDATE_INTERVAL_DEFAULT): vol.All(vol.Coerce(int), vol.Range(min=1)),
     }
 )
 

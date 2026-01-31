@@ -18,8 +18,8 @@ from requests.exceptions import ConnectionError
 from .api import PitPatApiClient
 from .const import (
     DOMAIN,
-    TOKEN,
-    USER_ID
+    CONFIG_KEY_TOKEN,
+    CONFIG_KEY_USER_ID
 )
 from .options_flow import OptionsFlowHandler
 
@@ -27,8 +27,8 @@ _LOGGER = logging.getLogger(__name__)
 
 DATA_SCHEMA = vol.Schema(
     {
-        vol.Required(TOKEN): str,
-        vol.Required(USER_ID): str,
+        vol.Required(CONFIG_KEY_TOKEN): str,
+        vol.Required(CONFIG_KEY_USER_ID): str,
     }
 )
 

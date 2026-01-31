@@ -3,14 +3,14 @@ import aiohttp
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
-from .const import TOKEN, USER_ID
+from .const import CONFIG_KEY_TOKEN, CONFIG_KEY_USER_ID
 
 class PitPatApiClient():
 
     @staticmethod
     def from_config(hass: HomeAssistant, config: Dict[str, Any]):
-        token = config[TOKEN]
-        user_id = config[USER_ID]
+        token = config[CONFIG_KEY_TOKEN]
+        user_id = config[CONFIG_KEY_USER_ID]
         session = async_create_clientsession(hass)
         api_client = PitPatApiClient(session, token, user_id)
         return api_client

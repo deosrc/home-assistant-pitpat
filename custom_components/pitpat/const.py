@@ -1,10 +1,11 @@
 DOMAIN = "pitpat"
 MANUFACTURER = "PitPat"
 
-TOKEN = "token"
-USER_ID = "user_id"
-UPDATE_INTERVAL = "update_interval"
+CONFIG_KEY_TOKEN = "token"
+CONFIG_KEY_USER_ID = "user_id"
+
+OPTIONS_KEY_UPDATE_INTERVAL = "update_interval"
+
+DATA_KEY_COORDINATOR = "coordinator"
 
 UPDATE_INTERVAL_DEFAULT = 5
-
-COORDINATOR = "coordinator"
