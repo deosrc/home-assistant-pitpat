@@ -13,5 +13,14 @@
       "invalid_auth": "Invalid authentication",
       "unknown": "Unexpected error (Enable to debug for more info)"
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Update Interval (Minutes)"
+        }
+      }
+    }
   }
 }

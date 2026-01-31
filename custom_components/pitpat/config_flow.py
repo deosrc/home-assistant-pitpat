@@ -1,9 +1,17 @@
-"""Config flow for Tdarr integration."""
+"""Config flow for PitPat integration."""
 import logging
 
 from aiohttp import ClientResponseError
 import voluptuous as vol
-from homeassistant import config_entries, core
+from homeassistant.config_entries import (
+    ConfigFlow,
+    ConfigEntry,
+    CONN_CLASS_CLOUD_POLL
+)
+from homeassistant.core import (
+    callback,
+    HomeAssistant
+)
 from homeassistant.exceptions import HomeAssistantError
 from requests.exceptions import ConnectionError
 
@@ -13,6 +21,7 @@ from .const import (
     TOKEN,
     USER_ID
 )
+from .options_flow import OptionsFlowHandler
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,7 +32,7 @@ DATA_SCHEMA = vol.Schema(
     }
 )
 
-async def validate_input(hass: core.HomeAssistant, data):
+async def validate_input(hass: HomeAssistant, data):
     """Validate the user input allows us to connect.
 
     Data has the keys from DATA_SCHEMA with values provided by the user.
@@ -36,11 +45,11 @@ async def validate_input(hass: core.HomeAssistant, data):
         _LOGGER.error("Failed to connect to PitPat")
         raise HomeAssistantError()
 
-class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class ConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Tdarr Controller."""
 
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
+    CONNECTION_CLASS = CONN_CLASS_CLOUD_POLL
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
@@ -64,3 +73,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user", data_schema=DATA_SCHEMA, errors=errors
         )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlowHandler:
+        """Get the options flow for this handler."""
+        return OptionsFlowHandler()
