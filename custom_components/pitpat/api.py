@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 import aiohttp
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
@@ -20,10 +20,20 @@ class PitPatApiClient():
         self._token = token
         self._user_id = user_id
 
-    async def async_check_connection(self) -> None:
+    async def async_get_dogs(self) -> List[Any]:
         result = await self._session.get(
             f"https://api.pitpat.com/api/Users/{self._user_id}/Dogs",
             headers = {
                 'Authorization': f'Bearer {self._token}'
             })
         result.raise_for_status()
+        return await result.json()
+
+    async def async_get_monitor(self, dog_id) -> Dict[str, dict]:
+        result = await self._session.get(
+            f"https://api.pitpat.com/api/Users/{self._user_id}/Dogs/{dog_id}/Monitors",
+            headers = {
+                'Authorization': f'Bearer {self._token}'
+            })
+        result.raise_for_status()
+        return await result.json()
