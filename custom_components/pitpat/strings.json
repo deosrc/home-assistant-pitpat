@@ -33,6 +33,9 @@
       },
       "gender": {
         "name": "Gender"
+      },
+      "date_of_birth": {
+        "name": "Date of Birth"
       }
     }
   }

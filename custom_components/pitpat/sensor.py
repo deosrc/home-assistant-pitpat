@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import logging
 from typing import Any, Callable, Dict
 
+import dateutil
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -12,6 +13,7 @@ from homeassistant.const import (
     ATTR_HW_VERSION,
 )
 from homeassistant.components.sensor import (
+    SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
 )
@@ -50,6 +52,13 @@ DOG_ENTITY_DESCRIPTIONS = [
         translation_key="gender",
         icon="mdi:gender-male-female",
         value_fn=lambda data: 'Female' if data.get('IsFemale', {}) else 'Male',
+    ),
+    PitPatSensorEntityDescription(
+        key="date_of_birth",
+        translation_key="date_of_birth",
+        icon="mdi:calendar",
+        device_class=SensorDeviceClass.DATE,
+        value_fn=lambda data: dateutil.parser.parse(data.get('BirthDate')),
     ),
 ]
 
