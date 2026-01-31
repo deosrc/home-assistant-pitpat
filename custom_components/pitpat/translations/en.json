@@ -48,6 +48,9 @@
       },
       "signal_strength": {
         "name": "Signal Strength"
+      },
+      "last_received": {
+        "name": "Last Received"
       }
     }
   }

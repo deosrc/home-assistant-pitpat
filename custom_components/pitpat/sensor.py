@@ -99,6 +99,14 @@ DOG_ENTITY_DESCRIPTIONS = [
         suggested_display_precision=0,
         value_fn=lambda data: _get_monitor(data).get('Network', {}).get('Value', {}).get('Quality') * 20,
     ),
+    PitPatSensorEntityDescription(
+        key="last_received",
+        translation_key="last_received",
+        icon="mdi:call-received",
+        device_class=SensorDeviceClass.DATE,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: dateutil.parser.parse(_get_monitor(data).get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')),
+    ),
 ]
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities):
