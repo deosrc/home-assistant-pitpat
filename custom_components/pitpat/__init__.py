@@ -13,7 +13,9 @@ from .const import (
     UPDATE_INTERVAL_DEFAULT,
 )
 
-PLATFORMS = []
+PLATFORMS = [
+    "sensor"
+]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,6 +30,10 @@ async def async_setup(hass: HomeAssistant, config: dict):
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up Tdarr Server from a config entry."""
     coordinator = PitPatDataUpdateCoordinator(hass, _get_update_interval(entry), entry.data)
+
+    hass.data[DOMAIN][entry.entry_id] = {
+        DATA_KEY_COORDINATOR: coordinator,
+    }
 
     # Get initial data so that correct sensors can be created
     await coordinator.async_refresh()

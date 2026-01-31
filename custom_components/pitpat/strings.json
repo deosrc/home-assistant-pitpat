@@ -22,5 +22,15 @@
         }
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "breed": {
+        "name": "Breed"
+      },
+      "family": {
+        "name": "Breed Family"
+      }
+    }
   }
 }
