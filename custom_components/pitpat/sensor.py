@@ -7,12 +7,15 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     EntityCategory,
+    UnitOfTime,
+    UnitOfMass,
     ATTR_IDENTIFIERS,
     ATTR_NAME,
     ATTR_MANUFACTURER,
     ATTR_SW_VERSION,
     ATTR_HW_VERSION,
     ATTR_SERIAL_NUMBER,
+    PERCENTAGE,
 )
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -71,7 +74,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         translation_key="weight",
         device_class=SensorDeviceClass.WEIGHT,
         state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement='kg', # TODO: Make sure this is correct based on user settings
+        native_unit_of_measurement=UnitOfMass.KILOGRAMS, # TODO: Make sure this is correct based on user settings
         value_fn=lambda data: data.get('Weight'),
     ),
     PitPatSensorEntityDescription(
@@ -80,7 +83,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
-        native_unit_of_measurement='%',
+        native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
         value_fn=lambda data: _get_monitor(data).get('BatteryInfo', {}).get('Value', {}).get('BatteryLevelFraction') * 100,
     ),
@@ -95,7 +98,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         translation_key="signal_strength",
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
-        native_unit_of_measurement='%',
+        native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
         value_fn=lambda data: _get_monitor(data).get('Network', {}).get('Value', {}).get('Quality') * 20,
     ),
@@ -106,6 +109,14 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.DATE,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: dateutil.parser.parse(_get_monitor(data).get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')),
+    ),
+    PitPatSensorEntityDescription(
+        key="activity_walking",
+        translation_key="activity_walking",
+        icon="mdi:walk",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        value_fn=lambda data: data.get('activity_today', {}).get('TotalWalkMinutes', 0),
     ),
 ]
 

@@ -51,6 +51,9 @@
       },
       "last_received": {
         "name": "Last Received"
+      },
+      "activity_walking": {
+        "name": "Walking"
       }
     }
   }
