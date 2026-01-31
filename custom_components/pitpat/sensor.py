@@ -11,6 +11,7 @@ from homeassistant.const import (
     ATTR_MANUFACTURER,
     ATTR_SW_VERSION,
     ATTR_HW_VERSION,
+    ATTR_SERIAL_NUMBER,
 )
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -136,4 +137,5 @@ class PitPatDogSensorEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], Sens
             ATTR_MANUFACTURER: MANUFACTURER,
             ATTR_SW_VERSION: self.data.get("Monitor", {}).get("FirmwareVersion", ""),
             ATTR_HW_VERSION: self.data.get("Monitor", {}).get("HardwareVersion", ""),
+            ATTR_SERIAL_NUMBER: self.data.get('monitor_details', {}).get('Value', {}).get('Monitor', {}).get('SerialNumber')
         }

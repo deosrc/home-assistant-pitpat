@@ -28,3 +28,12 @@ class PitPatApiClient():
             })
         result.raise_for_status()
         return await result.json()
+
+    async def async_get_monitor(self, dog_id) -> Dict[str, dict]:
+        result = await self._session.get(
+            f"https://api.pitpat.com/api/Users/{self._user_id}/Dogs/{dog_id}/Monitors",
+            headers = {
+                'Authorization': f'Bearer {self._token}'
+            })
+        result.raise_for_status()
+        return await result.json()

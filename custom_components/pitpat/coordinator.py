@@ -35,3 +35,18 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         """Fetch data"""
         dogs = await self._api_client.async_get_dogs()
         self.dogs = { d['Id']: d for d in dogs}
+
+        for dog_id in self.dogs.keys():
+            self.dogs[dog_id] = await self._async_update_dog_data(dog_id)
+
+    async def _async_update_dog_data(self, dog_id):
+        base_details = self.dogs[dog_id]
+
+        monitor_details = await self._api_client.async_get_monitor(dog_id)
+
+        return {
+            **base_details,
+            **{
+                'monitor_details': monitor_details
+            }
+        }
