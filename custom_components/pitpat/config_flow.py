@@ -1,0 +1,66 @@
+"""Config flow for Tdarr integration."""
+import logging
+
+from aiohttp import ClientResponseError
+import voluptuous as vol
+from homeassistant import config_entries, core
+from homeassistant.exceptions import HomeAssistantError
+from requests.exceptions import ConnectionError
+
+from .api import PitPatApiClient
+from .const import (
+    DOMAIN,
+    TOKEN,
+    USER_ID
+)
+
+_LOGGER = logging.getLogger(__name__)
+
+DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required(TOKEN): str,
+        vol.Required(USER_ID): str,
+    }
+)
+
+async def validate_input(hass: core.HomeAssistant, data):
+    """Validate the user input allows us to connect.
+
+    Data has the keys from DATA_SCHEMA with values provided by the user.
+    """
+    api_client: PitPatApiClient = PitPatApiClient.from_config(hass, data)
+
+    try:
+        await api_client.async_check_connection()
+    except:
+        _LOGGER.error("Failed to connect to PitPat")
+        raise HomeAssistantError()
+
+class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Tdarr Controller."""
+
+    VERSION = 1
+    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
+
+    async def async_step_user(self, user_input=None):
+        """Handle the initial step."""
+        errors = {}
+        if user_input is not None:
+            try:
+                await validate_input(self.hass, user_input)
+                return self.async_create_entry(title="PitPat", data=user_input)
+            except ConnectionError:
+                errors["base"] = "cannot_connect"
+            except ClientResponseError as err:
+                _LOGGER.exception(err)
+                if (err.code == 401):
+                    errors["base"] = "invalid_auth"
+                else:
+                    errors["base"] = "unknown"
+            except Exception as ex:  # pylint: disable=broad-except
+                _LOGGER.exception(ex)
+                errors["base"] = "unknown"
+
+        return self.async_show_form(
+            step_id="user", data_schema=DATA_SCHEMA, errors=errors
+        )
