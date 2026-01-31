@@ -82,6 +82,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
 
 class PitPatDogSensorEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], SensorEntity):
 
+    _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
+
     def __init__(self, coordinator: PitPatDataUpdateCoordinator, dog_id: str, description: PitPatSensorEntityDescription):
         CoordinatorEntity.__init__(self, coordinator)
         self._dog_id = dog_id
