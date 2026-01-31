@@ -158,6 +158,14 @@ DOG_ENTITY_DESCRIPTIONS = [
         native_unit_of_measurement=UnitOfTime.MINUTES,
         value_fn=lambda data: data.get('activity_today', {}).get('Activeness', 0),
     ),
+    PitPatSensorEntityDescription(
+        key="activity_steps",
+        translation_key="activity_steps",
+        icon="mdi:paw",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement="steps",
+        value_fn=lambda data: data.get('activity_today', {}).get('TotalSteps', 0),
+    ),
 ]
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities):

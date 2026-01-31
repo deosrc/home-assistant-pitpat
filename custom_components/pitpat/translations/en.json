@@ -69,6 +69,9 @@
       },
       "activity_total_exercising": {
         "name": "Total Exercising Today"
+      },
+      "activity_steps": {
+        "name": "Steps Today"
       }
     }
   }
