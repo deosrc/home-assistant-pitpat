@@ -37,3 +37,12 @@ class PitPatApiClient():
             })
         result.raise_for_status()
         return await result.json()
+
+    async def async_get_all_activity_days(self, dog_id) -> Dict[str, dict]:
+        result = await self._session.get(
+            f'https://activity.pitpat.com/api/Users/{self._user_id}/Dogs/{dog_id}/AllActivityDays',
+            headers = {
+                'Authorization': f'Bearer {self._token}'
+            })
+        result.raise_for_status()
+        return await result.json()
