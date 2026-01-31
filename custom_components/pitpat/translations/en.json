@@ -52,8 +52,23 @@
       "last_received": {
         "name": "Last Received"
       },
+      "activity_pottering": {
+        "name": "Pottering Today"
+      },
+      "activity_running": {
+        "name": "Running Today"
+      },
       "activity_walking": {
-        "name": "Walking"
+        "name": "Walking Today"
+      },
+      "activity_playing": {
+        "name": "Playing Today"
+      },
+      "activity_resting": {
+        "name": "Resting Today"
+      },
+      "activity_total_exercising": {
+        "name": "Total Exercising Today"
       }
     }
   }
