@@ -6,6 +6,7 @@ import dateutil
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
+    EntityCategory,
     ATTR_IDENTIFIERS,
     ATTR_NAME,
     ATTR_MANUFACTURER,
@@ -17,6 +18,7 @@ from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
+    SensorStateClass,
 )
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -68,6 +70,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         key="weight",
         translation_key="weight",
         device_class=SensorDeviceClass.WEIGHT,
+        state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement='kg', # TODO: Make sure this is correct based on user settings
         value_fn=lambda data: data.get('Weight'),
     ),
@@ -75,9 +78,26 @@ DOG_ENTITY_DESCRIPTIONS = [
         key="battery_level",
         translation_key="battery_level",
         device_class=SensorDeviceClass.BATTERY,
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement='%',
         suggested_display_precision=0,
         value_fn=lambda data: _get_monitor(data).get('BatteryInfo', {}).get('Value', {}).get('BatteryLevelFraction') * 100,
+    ),
+    PitPatSensorEntityDescription(
+        key="network",
+        translation_key="network",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: _get_monitor(data).get('Network', {}).get('Value', {}).get('NetworkOperator', {}).get('Value'),
+    ),
+    PitPatSensorEntityDescription(
+        key="signal_strength",
+        translation_key="signal_strength",
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement='%',
+        suggested_display_precision=0,
+        value_fn=lambda data: _get_monitor(data).get('Network', {}).get('Value', {}).get('Quality') * 20,
     ),
 ]
 
