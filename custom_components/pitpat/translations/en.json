@@ -36,6 +36,9 @@
       },
       "date_of_birth": {
         "name": "Date of Birth"
+      },
+      "weight": {
+        "name": "Weight"
       }
     }
   }

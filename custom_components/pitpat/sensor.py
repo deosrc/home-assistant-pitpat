@@ -60,6 +60,13 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.DATE,
         value_fn=lambda data: dateutil.parser.parse(data.get('BirthDate')),
     ),
+    PitPatSensorEntityDescription(
+        key="weight",
+        translation_key="weight",
+        device_class=SensorDeviceClass.WEIGHT,
+        native_unit_of_measurement='kg', # TODO: Make sure this is correct based on user settings
+        value_fn=lambda data: data.get('Weight'),
+    ),
 ]
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities):
