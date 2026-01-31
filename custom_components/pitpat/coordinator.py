@@ -1,6 +1,7 @@
 
 from datetime import timedelta
 import logging
+from typing import Dict
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator
@@ -13,6 +14,8 @@ _LOGGER = logging.getLogger(__name__)
 
 class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
     """DataUpdateCoordinator to handle fetching data from PitPat."""
+
+    dogs: Dict[str, dict]
 
     def __init__(self, hass: HomeAssistant, update_interval, config_data):
         """Initialize the coordinator and set up the Controller object."""
@@ -30,4 +33,5 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
 
     async def _async_update_data(self):
         """Fetch data"""
-        pass
+        dogs = await self._api_client.async_get_dogs()
+        self.dogs = { d['Id']: d for d in dogs}

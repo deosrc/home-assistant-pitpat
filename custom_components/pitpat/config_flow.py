@@ -40,7 +40,7 @@ async def validate_input(hass: HomeAssistant, data):
     api_client: PitPatApiClient = PitPatApiClient.from_config(hass, data)
 
     try:
-        await api_client.async_check_connection()
+        await api_client.async_get_dogs()
     except:
         _LOGGER.error("Failed to connect to PitPat")
         raise HomeAssistantError()
