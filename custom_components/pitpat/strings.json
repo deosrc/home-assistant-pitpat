@@ -30,6 +30,9 @@
       },
       "family": {
         "name": "Breed Family"
+      },
+      "gender": {
+        "name": "Gender"
       }
     }
   }

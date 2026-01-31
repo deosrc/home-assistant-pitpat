@@ -45,6 +45,12 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:dog-side",
         value_fn=lambda data: data.get('Breed', {}).get('Family'),
     ),
+    PitPatSensorEntityDescription(
+        key="gender",
+        translation_key="gender",
+        icon="mdi:gender-male-female",
+        value_fn=lambda data: 'Female' if data.get('IsFemale', {}) else 'Male',
+    ),
 ]
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities):
