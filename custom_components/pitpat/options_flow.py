@@ -5,7 +5,6 @@ import voluptuous as vol
 from homeassistant.config_entries import (
     OptionsFlow,
 )
-from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
     UPDATE_INTERVAL,
@@ -16,7 +15,7 @@ _LOGGER = logging.getLogger(__name__)
 
 OPTIONS_SCHEMA = vol.Schema(
     {
-        vol.Required(UPDATE_INTERVAL, default=UPDATE_INTERVAL_DEFAULT): int,
+        vol.Required(UPDATE_INTERVAL, default=UPDATE_INTERVAL_DEFAULT): vol.All(vol.Coerce(int), vol.Range(min=1)),
     }
 )
 
