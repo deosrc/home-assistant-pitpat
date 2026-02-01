@@ -81,6 +81,9 @@
       },
       "live_tracking_mode": {
         "name": "Live Tracking Mode"
+      },
+      "live_tracking_status": {
+        "name": "Live Tracking Status"
       }
     }
   }
