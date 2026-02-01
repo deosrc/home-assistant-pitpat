@@ -40,6 +40,16 @@ _LOGGER = logging.getLogger(__name__)
 def _get_monitor(data: dict) -> dict:
     return data.get('monitor_details', {}).get('Value', {}).get('Monitor', {})
 
+def _get_tracking_mode(data: dict):
+    monitor = _get_monitor(data)
+    reason_id = monitor.get('LiveTrackingReason', 0)
+    if reason_id == 1:
+        return 'Find my dog'
+    elif reason_id == 2:
+        return 'Walk'
+    else:
+        return 'None'
+
 @dataclass(frozen=True, kw_only=True)
 class PitPatSensorEntityDescription(SensorEntityDescription):
     value_fn: Callable[[dict], str | int | float | None]
@@ -184,6 +194,12 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfEnergy.KILO_CALORIE,
         value_fn=lambda data: data.get('activity_today', {}).get('TotalCalories', 0),
+    ),
+    PitPatSensorEntityDescription(
+        key="live_tracking_mode",
+        translation_key="live_tracking_mode",
+        icon="mdi:map-marker-radius",
+        value_fn=lambda data: _get_tracking_mode(data),
     ),
 ]
 

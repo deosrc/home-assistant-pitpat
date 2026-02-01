@@ -78,6 +78,9 @@
       },
       "activity_calories": {
         "name": "Calories Burned Today"
+      },
+      "live_tracking_mode": {
+        "name": "Live Tracking Mode"
       }
     }
   }
