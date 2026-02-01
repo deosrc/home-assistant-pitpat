@@ -120,6 +120,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
+        suggested_unit_of_measurement=UnitOfTime.HOURS,
         value_fn=lambda data: data.get('activity_today', {}).get('TotalPotteringMinutes', 0),
     ),
     PitPatSensorEntityDescription(
@@ -156,6 +157,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
+        suggested_unit_of_measurement=UnitOfTime.HOURS,
         value_fn=lambda data: data.get('activity_today', {}).get('TotalRestMinutes', 0),
     ),
     PitPatSensorEntityDescription(
@@ -182,6 +184,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=UnitOfLength.METERS,
+        suggested_unit_of_measurement=UnitOfLength.KILOMETERS,
         suggested_display_precision=0,
         value_fn=lambda data: data.get('activity_today', {}).get('TotalDistance', 0),
     ),
