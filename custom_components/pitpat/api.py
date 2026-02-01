@@ -46,3 +46,11 @@ class PitPatApiClient():
             })
         result.raise_for_status()
         return await result.json()
+
+    async def async_stop_tracking(self, dog_id) -> None:
+        result = await self._session.put(
+            f'https://location.pitpat.com/api/user/{self._user_id}/dog/{dog_id}/livetracking/stop',
+            headers = {
+                'Authorization': f'Bearer {self._token}'
+            })
+        result.raise_for_status()

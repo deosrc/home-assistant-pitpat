@@ -85,6 +85,11 @@
       "live_tracking_status": {
         "name": "Live Tracking Status"
       }
+    },
+    "button": {
+      "tracking_stop": {
+        "name": "Stop Tracking"
+      }
     }
   }
 }
