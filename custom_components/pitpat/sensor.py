@@ -108,7 +108,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         key="last_received",
         translation_key="last_received",
         icon="mdi:call-received",
-        device_class=SensorDeviceClass.DATE,
+        device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: dateutil.parser.parse(_get_monitor(data).get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')),
     ),
