@@ -77,6 +77,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.WEIGHT,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfMass.KILOGRAMS, # TODO: Make sure this is correct based on user settings
+        suggested_display_precision=1,
         value_fn=lambda data: data.get('Weight'),
     ),
     PitPatSensorEntityDescription(
