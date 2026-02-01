@@ -15,6 +15,8 @@ from .const import (
 
 PLATFORMS = [
     "sensor",
+    "binary_sensor",
+    "button",
     "device_tracker",
 ]
 

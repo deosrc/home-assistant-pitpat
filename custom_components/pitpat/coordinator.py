@@ -21,7 +21,7 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         """Initialize the coordinator and set up the Controller object."""
         self._hass = hass
 
-        self._api_client = PitPatApiClient.from_config(hass, config_data)
+        self.api_client = PitPatApiClient.from_config(hass, config_data)
         self._available = True
 
         super().__init__(
@@ -33,7 +33,7 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
 
     async def _async_update_data(self):
         """Fetch data"""
-        dogs = await self._api_client.async_get_dogs()
+        dogs = await self.api_client.async_get_dogs()
         self.dogs = { d['Id']: d for d in dogs}
 
         for dog_id in self.dogs.keys():
@@ -42,8 +42,8 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
     async def _async_update_dog_data(self, dog_id):
         base_details = self.dogs[dog_id]
 
-        monitor_details = await self._api_client.async_get_monitor(dog_id)
-        all_activity_days = await self._api_client.async_get_all_activity_days(dog_id)
+        monitor_details = await self.api_client.async_get_monitor(dog_id)
+        all_activity_days = await self.api_client.async_get_all_activity_days(dog_id)
 
         activity_today = None
         if (len(all_activity_days) > 0):
