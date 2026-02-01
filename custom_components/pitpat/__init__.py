@@ -15,8 +15,9 @@ from .const import (
 
 PLATFORMS = [
     "sensor",
-    "device_tracker",
+    "binary_sensor",
     "button",
+    "device_tracker",
 ]
 
 _LOGGER = logging.getLogger(__name__)

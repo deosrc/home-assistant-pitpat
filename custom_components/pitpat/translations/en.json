@@ -86,6 +86,11 @@
         "name": "Live Tracking Status"
       }
     },
+    "binary_sensor": {
+      "live_tracking_active": {
+        "name": "Live Tracking"
+      }
+    },
     "button": {
       "tracking_stop": {
         "name": "Stop Tracking"
