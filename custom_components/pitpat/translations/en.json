@@ -89,6 +89,12 @@
     "button": {
       "tracking_stop": {
         "name": "Stop Tracking"
+      },
+      "tracking_start_find": {
+        "name": "Find My Dog"
+      },
+      "tracking_start_walk": {
+        "name": "Start a Walk"
       }
     }
   }
