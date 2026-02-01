@@ -69,7 +69,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         translation_key="date_of_birth",
         icon="mdi:calendar",
         device_class=SensorDeviceClass.DATE,
-        value_fn=lambda data: dateutil.parser.parse(data.get('BirthDate')),
+        value_fn=lambda data: dateutil.parser.parse(data.get('BirthDate')).date(),
     ),
     PitPatSensorEntityDescription(
         key="weight",
