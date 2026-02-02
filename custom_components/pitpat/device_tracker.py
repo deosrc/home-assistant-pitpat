@@ -75,7 +75,7 @@ class PitPatDogDeviceTrackerEntity(CoordinatorEntity[PitPatDataUpdateCoordinator
     @property
     def longitude(self):
         try:
-            return _get_monitor(self.data).get('LastKnownPosition', {}).get('Value', {}).get('Latitude')
+            return _get_monitor(self.data).get('LastKnownPosition', {}).get('Value', {}).get('Longitude')
         except Exception as e:
             raise ValueError(f"Unable to get longitude value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
 
