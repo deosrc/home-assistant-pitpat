@@ -22,7 +22,8 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "EditorConfig.EditorConfig"
+        "EditorConfig.EditorConfig",
+        "bierner.github-markdown-preview"
       ]
     }
   },
