@@ -6,7 +6,14 @@
           "username": "Username",
           "password": "Password"
         }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate",
+        "description": "The PitPat integration needs to re-authenticate your account"
       }
+    },
+    "abort": {
+      "reauth_successful": "Re-authentication successful"
     },
     "error": {
       "cannot_connect": "Failed to connect",
