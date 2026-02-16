@@ -5,12 +5,13 @@ from typing import Dict
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator
 )
 
-from .api import PitPatApiClient
+from .api import InvalidCredentialsError, PitPatApiClient
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,18 +37,32 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         )
 
     async def _async_ensure_ready(self):
-        if self._api_client:
-            return
+        if not self._api_client:
+            await self._async_refresh_auth()
 
-        await self._async_refresh_auth()
+        is_authenticated = await self._api_client.async_ensure_user_id_present()
+        if not is_authenticated:
+            raise ConfigEntryAuthFailed()
 
     async def _async_refresh_auth(self):
-        session = async_create_clientsession(self._hass)
-        tokens = await PitPatApiClient.async_authenticate_from_refresh_token(session, self._config_entry.data.get('refresh_token'))
-        self._api_client = PitPatApiClient(session, tokens)
+        _LOGGER.info('Preparing new API client from refresh token.')
+        try:
+            session = async_create_clientsession(self._hass)
+            tokens = await PitPatApiClient.async_authenticate_from_refresh_token(session, self._config_entry.data.get('refresh_token'))
+            self._api_client = PitPatApiClient(session, tokens)
+        except InvalidCredentialsError as err:
+            raise ConfigEntryAuthFailed() from err
 
     async def _async_update_data(self):
         """Fetch data"""
+        try:
+            await self._async_refresh_data()
+        except Exception as err:
+            _LOGGER.warning('Request failed. Attempting to re-authenticate.', exc_info=err)
+            self._api_client = None
+            await self._async_refresh_data()
+
+    async def _async_refresh_data(self) -> None:
         await self._async_ensure_ready()
 
         dogs = await self._api_client.async_get_dogs()
