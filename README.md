@@ -38,7 +38,6 @@ For Android:
 1. Start a capture in PCAP, then open the Pitpat app. The app is very chatty so you only have to open it and PCAP should capture a lot of requests with the required information.
 1. Stop the capture and go to the connections tab. Open any of the HTTPS request EXCEPT for `handler.pitpat.com`.
 1. Grab the auth token from the request. It will be in the format `Authorization: Bearer <token>`
-1. Grab the user Id from the request. It will be on the first line in the url, usually as: `.../Users/<user-id>/Dogs/...`
 
 I'm unable to provide instructions for iOS devices.
 
