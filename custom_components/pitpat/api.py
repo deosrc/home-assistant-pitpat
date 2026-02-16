@@ -5,10 +5,32 @@ from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .const import CONFIG_KEY_TOKEN
 
-class MissingUserIdError(Exception):
+class InvalidCredentialsError(Exception):
     pass
 
 class PitPatApiClient():
+
+    @staticmethod
+    async def async_get_refresh_token(hass: HomeAssistant, username: str, password: str) -> str:
+        session = async_create_clientsession(hass)
+
+        form_data = aiohttp.FormData()
+        form_data.add_field('grant_type', 'password')
+        form_data.add_field('username', username)
+        form_data.add_field('password', password)
+        form_data.add_field('client_id', 'PitPatApp')
+        form_data.add_field('scope', 'PitPatApi offline_access')
+
+        result = await session.post(
+            'https://auth.pitpat.com/connect/token',
+            data=form_data)
+
+        response: Dict[str, str] = await result.json()
+        if result.status == 400 and 'invalid_grant' == response.get('error'):
+            raise InvalidCredentialsError()
+
+        result.raise_for_status()
+        return response.get('refresh_token')
 
     @staticmethod
     def from_config(hass: HomeAssistant, config: Dict[str, Any]):
@@ -29,7 +51,7 @@ class PitPatApiClient():
             self.__user_id = settings.get('UserId')
 
         if not self.__user_id:
-            raise MissingUserIdError()
+            raise InvalidCredentialsError()
 
         return self.__user_id
 

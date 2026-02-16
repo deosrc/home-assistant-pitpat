@@ -3,14 +3,14 @@
     "step": {
       "user": {
         "data": {
-          "token": "Auth Token",
-          "user_id": "User Id"
+          "username": "Username",
+          "password": "Password"
         }
       }
     },
     "error": {
       "cannot_connect": "Failed to connect",
-      "invalid_auth": "Invalid authentication",
+      "invalid_auth": "Invalid credentials",
       "unknown": "Unexpected error (Enable to debug for more info)"
     }
   },
