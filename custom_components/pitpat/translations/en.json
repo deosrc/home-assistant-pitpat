@@ -3,14 +3,21 @@
     "step": {
       "user": {
         "data": {
-          "token": "Auth Token",
-          "user_id": "User Id"
+          "username": "Username",
+          "password": "Password"
         }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate",
+        "description": "The PitPat integration needs to re-authenticate your account"
       }
+    },
+    "abort": {
+      "reauth_successful": "Re-authentication successful"
     },
     "error": {
       "cannot_connect": "Failed to connect",
-      "invalid_auth": "Invalid authentication",
+      "invalid_auth": "Invalid credentials",
       "unknown": "Unexpected error (Enable to debug for more info)"
     }
   },

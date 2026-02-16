@@ -1,5 +1,6 @@
 """PitPat custom integration for Home Assistant."""
 
+import asyncio
 import logging
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -32,7 +33,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up Tdarr Server from a config entry."""
-    coordinator = PitPatDataUpdateCoordinator(hass, _get_update_interval(entry), entry.data)
+    coordinator = PitPatDataUpdateCoordinator(hass, _get_update_interval(entry), entry)
 
     hass.data[DOMAIN][entry.entry_id] = {
         DATA_KEY_COORDINATOR: coordinator,
@@ -50,6 +51,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Unload a config entry."""
+    unload_ok = all(
+        await asyncio.gather(
+            *[
+                hass.config_entries.async_forward_entry_unload(entry, component)
+                for component in PLATFORMS
+            ]
+        )
+    )
+
+    coordinator: PitPatDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][DATA_KEY_COORDINATOR]
+    await coordinator.async_shutdown()
+
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id)
+
+    return unload_ok
 
 async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
     """Handle options update."""
