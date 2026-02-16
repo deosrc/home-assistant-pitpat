@@ -32,7 +32,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up Tdarr Server from a config entry."""
-    coordinator = PitPatDataUpdateCoordinator(hass, _get_update_interval(entry), entry.data)
+    coordinator = PitPatDataUpdateCoordinator(hass, _get_update_interval(entry), entry)
 
     hass.data[DOMAIN][entry.entry_id] = {
         DATA_KEY_COORDINATOR: coordinator,

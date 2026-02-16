@@ -1,9 +1,6 @@
 DOMAIN = "pitpat"
 MANUFACTURER = "PitPat"
 
-CONFIG_KEY_TOKEN = "token"
-CONFIG_KEY_REFRESH_TOKEN = 'refresh_token'
-
 OPTIONS_KEY_UPDATE_INTERVAL = "update_interval"
 
 DATA_KEY_COORDINATOR = "coordinator"

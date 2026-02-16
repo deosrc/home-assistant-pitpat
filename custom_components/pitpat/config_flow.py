@@ -9,6 +9,7 @@ from homeassistant.config_entries import (
     ConfigEntry,
     CONN_CLASS_CLOUD_POLL
 )
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.core import (
     callback,
     HomeAssistant
@@ -18,7 +19,6 @@ from requests.exceptions import ConnectionError
 from .api import InvalidCredentialsError, PitPatApiClient
 from .const import (
     DOMAIN,
-    CONFIG_KEY_REFRESH_TOKEN,
 )
 from .options_flow import OptionsFlowHandler
 
@@ -39,8 +39,8 @@ async def validate_input(hass: HomeAssistant, username: str, password: str) -> D
 
     Data has the keys from DATA_SCHEMA with values provided by the user.
     """
-    refresh_token = await PitPatApiClient.async_get_refresh_token(hass, username, password)
-    return refresh_token
+    session = async_create_clientsession(hass)
+    return await PitPatApiClient.async_authenticate_from_credentials(session, username, password)
 
 class ConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Tdarr Controller."""
@@ -53,12 +53,11 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             try:
-                refresh_token = await validate_input(self.hass, user_input[DATA_KEY_USERNAME], user_input[DATA_KEY_PASSWORD])
+                username = user_input[DATA_KEY_USERNAME]
+                tokens = await validate_input(self.hass, username, user_input[DATA_KEY_PASSWORD])
                 return self.async_create_entry(
-                    title="PitPat",
-                    data={
-                        CONFIG_KEY_REFRESH_TOKEN: refresh_token
-                    })
+                    title=username,
+                    data=tokens)
             except ConnectionError as err:
                 _LOGGER.exception(err)
                 errors["base"] = "cannot_connect"
