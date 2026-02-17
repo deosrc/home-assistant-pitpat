@@ -2,9 +2,11 @@ from typing import Any, Dict, List
 import aiohttp
 
 class InvalidCredentialsError(Exception):
+    """The operation failed due to invalid or expired credentials."""
     pass
 
 class PitPatApiClient():
+    """API Client for PitPat pet trackers."""
 
     __HOST_AUTH = 'https://auth.pitpat.com'
     __HOST_API = 'https://api.pitpat.com'
@@ -13,6 +15,18 @@ class PitPatApiClient():
 
     @staticmethod
     async def async_authenticate_from_credentials(session: aiohttp.ClientSession, username: str, password: str) -> Dict[str, Any]:
+        """
+        Authenticate with PitPat using username and password.
+
+        :param session: aiohttp session to use for the request
+        :type session: aiohttp.ClientSession
+        :param username: Username for the account
+        :type username: str
+        :param password: Password for the account
+        :type password: str
+        :return: The response of the auth request
+        :rtype: Dict[str, Any]
+        """
         return await PitPatApiClient.__async_authenticate(
             session,
             {
@@ -24,6 +38,16 @@ class PitPatApiClient():
 
     @staticmethod
     async def async_authenticate_from_refresh_token(session: aiohttp.ClientSession, refresh_token: str) -> Dict[str, Any]:
+        """
+        Refresh the auth token.
+
+        :param session: aiohttp session to use for the request
+        :type session: aiohttp.ClientSession
+        :param refresh_token: The refresh token for the session
+        :type refresh_token: str
+        :return: The response of the auth request
+        :rtype: Dict[str, Any]
+        """
         return await PitPatApiClient.__async_authenticate(
             session,
             {
@@ -34,6 +58,16 @@ class PitPatApiClient():
 
     @staticmethod
     async def __async_authenticate(session: aiohttp.ClientSession, data: Dict[str, str]) -> Dict[str, Any]:
+        """
+        Send an authentication request.
+
+        :param session: aiohttp session to use for the request
+        :type session: aiohttp.ClientSession
+        :param data: Data to use for the authentication request.
+        :type data: str
+        :return: The response of the auth request
+        :rtype: Dict[str, Any]
+        """
         form_data = aiohttp.FormData()
         form_data.add_field('client_id', 'PitPatApp')
         form_data.add_field('scope', 'PitPatApi offline_access')
@@ -59,11 +93,20 @@ class PitPatApiClient():
 
     @property
     def default_headers(self):
+        """
+        The default headers to use for requests.
+        """
         return {
             'Authorization': f'{self._tokens.get('token_type')} {self._tokens.get('access_token')}'
         }
 
     async def async_get_settings(self) -> Dict[str, str]:
+        """
+        Retrieves account settings.
+
+        :return: Account settings.
+        :rtype: Dict[str, str]
+        """
         result = await self._session.get(
             f'{PitPatApiClient.__HOST_API}/api/Settings',
             headers=self.default_headers)
@@ -71,6 +114,12 @@ class PitPatApiClient():
         return await result.json()
 
     async def async_get_dogs(self) -> List[Any]:
+        """
+        Retrieve information for degs registered to the account.
+
+        :return: Details of dogs registered to the account.
+        :rtype: List[Any]
+        """
         await self.async_ensure_user_id_present()
         result = await self._session.get(
             f'{PitPatApiClient.__HOST_API}/api/Users/{self.__user_id}/Dogs',
@@ -79,6 +128,13 @@ class PitPatApiClient():
         return await result.json()
 
     async def async_get_monitor(self, dog_id) -> Dict[str, dict]:
+        """
+        Retrieve information for a monitor registered to the account.
+
+        :param dog_id: The Id for the dog the monitor is registered to.
+        :return: Details of the monitor.
+        :rtype: Dict[str, dict]
+        """
         await self.async_ensure_user_id_present()
         result = await self._session.get(
             f'{PitPatApiClient.__HOST_API}/api/Users/{self.__user_id}/Dogs/{dog_id}/Monitors',
@@ -86,7 +142,14 @@ class PitPatApiClient():
         result.raise_for_status()
         return await result.json()
 
-    async def async_get_all_activity_days(self, dog_id) -> Dict[str, dict]:
+    async def async_get_all_activity_days(self, dog_id) -> List[Dict[str, dict]]:
+        """
+        Retrieve information for activity by day.
+
+        :param dog_id: The Id for the dog the monitor is registered to.
+        :return: A list of activity by day.
+        :rtype: List[Dict[str, dict]]
+        """
         await self.async_ensure_user_id_present()
         result = await self._session.get(
             f'{PitPatApiClient.__HOST_ACTIVITY}/api/Users/{self.__user_id}/Dogs/{dog_id}/AllActivityDays',
@@ -95,6 +158,11 @@ class PitPatApiClient():
         return await result.json()
 
     async def async_tracking_stop(self, dog_id) -> None:
+        """
+        Stops active tracking.
+
+        :param dog_id: The Id for the dog the monitor is registered to.
+        """
         await self.async_ensure_user_id_present()
         result = await self._session.put(
             f'{PitPatApiClient.__HOST_LOCATION}/api/user/{self.__user_id}/dog/{dog_id}/livetracking/stop',
@@ -102,6 +170,11 @@ class PitPatApiClient():
         result.raise_for_status()
 
     async def async_tracking_start_find(self, dog_id) -> None:
+        """
+        Starts active tracking in "find my dog" mode.
+
+        :param dog_id: The Id for the dog the monitor is registered to.
+        """
         await self.async_ensure_user_id_present()
         result = await self._session.put(
             f'{PitPatApiClient.__HOST_LOCATION}/api/user/{self.__user_id}/dog/{dog_id}/livetracking/start/find',
@@ -109,6 +182,11 @@ class PitPatApiClient():
         result.raise_for_status()
 
     async def async_tracking_start_walk(self, dog_id) -> None:
+        """
+        Starts active tracking in walk mode.
+
+        :param dog_id: The Id for the dog the monitor is registered to.
+        """
         await self.async_ensure_user_id_present()
         result = await self._session.put(
             f'{PitPatApiClient.__HOST_LOCATION}/api/user/{self.__user_id}/dog/{dog_id}/livetracking/start/walk',
@@ -116,6 +194,12 @@ class PitPatApiClient():
         result.raise_for_status()
 
     async def async_ensure_user_id_present(self) -> bool:
+        """
+        Ensures the current user Id is configured on the API client.
+
+        :return: True if the user Id is available (i.e. the client is authenticated), otherwise false.
+        :rtype: bool
+        """
         if self.__user_id:
             return
 
