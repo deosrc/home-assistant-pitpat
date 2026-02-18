@@ -28,9 +28,11 @@ Some sensors may not be available for your device type. I only have a single GPS
 
     [![Open your Home Assistant instance and show an integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=pitpat)
 
-When setting up the integration, enter your PitPat app username (email) and password. Tokens are generated automatically; packet capture is no longer required as of v0.5.
+1. Enter the email address and password for your PitPat account.
 
-> If authentication fails later (e.g., password changed), Home Assistant will prompt for re-auth—just re-enter your PitPat credentials.
+If authentication fails later (e.g., password changed), Home Assistant will prompt you to re-authenticate. Click repair, and re-enter your PitPat credentials.
+
+> :information_source: Previous versions required packet capture from the Android app. This is no longer required as of v0.5.
 
 ## Options
 
