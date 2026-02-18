@@ -27,7 +27,7 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         self._config_entry = config_entry
 
         self._available = True
-        self._api_client: PitPatApiClient | None = None
+        self.api_client: PitPatApiClient | None = None
 
         super().__init__(
             hass,
@@ -37,10 +37,10 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         )
 
     async def _async_ensure_ready(self):
-        if not self._api_client:
+        if not self.api_client:
             await self._async_refresh_auth()
 
-        is_authenticated = await self._api_client.async_ensure_user_id_present()
+        is_authenticated = await self.api_client.async_ensure_user_id_present()
         if not is_authenticated:
             raise ConfigEntryAuthFailed()
 
@@ -49,7 +49,7 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         try:
             session = async_create_clientsession(self._hass)
             tokens = await PitPatApiClient.async_authenticate_from_refresh_token(session, self._config_entry.data.get('refresh_token'))
-            self._api_client = PitPatApiClient(session, tokens)
+            self.api_client = PitPatApiClient(session, tokens)
         except InvalidCredentialsError as err:
             raise ConfigEntryAuthFailed() from err
 
@@ -59,13 +59,13 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             await self._async_refresh_data()
         except Exception as err:
             _LOGGER.warning('Request failed. Attempting to re-authenticate.', exc_info=err)
-            self._api_client = None
+            self.api_client = None
             await self._async_refresh_data()
 
     async def _async_refresh_data(self) -> None:
         await self._async_ensure_ready()
 
-        dogs = await self._api_client.async_get_dogs()
+        dogs = await self.api_client.async_get_dogs()
         self.dogs = { d['Id']: d for d in dogs}
 
         for dog_id in self.dogs.keys():
@@ -74,8 +74,8 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
     async def _async_update_dog_data(self, dog_id):
         base_details = self.dogs[dog_id]
 
-        monitor_details = await self._api_client.async_get_monitor(dog_id)
-        all_activity_days = await self._api_client.async_get_all_activity_days(dog_id)
+        monitor_details = await self.api_client.async_get_monitor(dog_id)
+        all_activity_days = await self.api_client.async_get_all_activity_days(dog_id)
 
         activity_today = None
         if (len(all_activity_days) > 0):
