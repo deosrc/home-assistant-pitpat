@@ -8,7 +8,6 @@ This is in no way endorsed or affiliated with PitPat.
 >
 > - Expect bugs caused by limited testing causing unreliable or incorrect data (I only have access to a single device of one type)
 > - Expect potentially breaking changes requiring you to re-write scripts and automations
-> - Be prepared for a not very user-friendly setup. It’s gets quite technical.
 > - Don’t expect support or quick fixes
 > - A PitPat subscription isn’t required for any of the integration functionality. The integration in some ways is replicating some of the functionality of the pitpat subscription model. Expect it to disappear swiftly if PitPat decide they don’t like this being available and take action.
 
