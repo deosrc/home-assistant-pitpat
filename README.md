@@ -8,7 +8,6 @@ This is in no way endorsed or affiliated with PitPat.
 >
 > - Expect bugs caused by limited testing causing unreliable or incorrect data (I only have access to a single device of one type)
 > - Expect potentially breaking changes requiring you to re-write scripts and automations
-> - Be prepared for a not very user-friendly setup. It’s gets quite technical.
 > - Don’t expect support or quick fixes
 > - A PitPat subscription isn’t required for any of the integration functionality. The integration in some ways is replicating some of the functionality of the pitpat subscription model. Expect it to disappear swiftly if PitPat decide they don’t like this being available and take action.
 
@@ -28,20 +27,11 @@ Some sensors may not be available for your device type. I only have a single GPS
 
     [![Open your Home Assistant instance and show an integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=pitpat)
 
-When setting up the integration, you will be asked for an auth token and user Id. Currently, these must be obtained by inspecting traffic from the app.
+1. Enter the email address and password for your PitPat account.
 
-For Android:
+If authentication fails later (e.g., password changed), Home Assistant will prompt you to re-authenticate. Click repair, and re-enter your PitPat credentials.
 
-1. Download the Pitpat app, and login
-1. Download [PCAP Android](https://github.com/emanuele-f/PCAPdroid) app, and configure it for [TLS decryption](https://emanuele-f.github.io/PCAPdroid/tls_decryption)
-1. Configure PCAP android to only monitor the Pitpat app
-1. Start a capture in PCAP, then open the Pitpat app. The app is very chatty so you only have to open it and PCAP should capture a lot of requests with the required information.
-1. Stop the capture and go to the connections tab. Open any of the HTTPS request EXCEPT for `handler.pitpat.com`.
-1. Grab the auth token from the request. It will be in the format `Authorization: Bearer <token>`
-
-I'm unable to provide instructions for iOS devices.
-
-> :warning: It is not currently known how long the auth token will last, or if it will remain active indefinitely. The only way currently to update the auth token is to remove and re-add the integration.
+> :information_source: Previous versions required packet capture from the Android app. This is no longer required as of v0.5.
 
 ## Options
 
