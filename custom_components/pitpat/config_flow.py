@@ -26,12 +26,12 @@ from .options_flow import OptionsFlowHandler
 
 _LOGGER = logging.getLogger(__name__)
 
-DATA_KEY_USERNAME = 'username'
+DATA_KEY_EMAIL = 'email'
 DATA_KEY_PASSWORD = 'password'
 
 DATA_SCHEMA = vol.Schema(
     {
-        vol.Required(DATA_KEY_USERNAME): str,
+        vol.Required(DATA_KEY_EMAIL): str,
         vol.Required(DATA_KEY_PASSWORD): str,
     }
 )
@@ -55,7 +55,7 @@ class PitPatConfigFlow(ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             try:
-                username = user_input[DATA_KEY_USERNAME]
+                username = user_input[DATA_KEY_EMAIL]
                 tokens = await validate_input(self.hass, username, user_input[DATA_KEY_PASSWORD])
                 if self.source == SOURCE_REAUTH:
                     return self.async_update_reload_and_abort(
