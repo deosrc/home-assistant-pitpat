@@ -6,6 +6,8 @@ import dateutil
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
+    ATTR_MODEL,
+    ATTR_MODEL_ID,
     EntityCategory,
     UnitOfEnergy,
     UnitOfLength,
@@ -29,6 +31,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     DATA_KEY_COORDINATOR,
+    DEVICE_MODEL_MAP,
     DOMAIN,
     MANUFACTURER,
 )
@@ -316,6 +319,8 @@ class PitPatDogSensorEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], Sens
             ATTR_IDENTIFIERS: {(DOMAIN, self._dog_id)},
             ATTR_NAME: self.data.get('Name'),
             ATTR_MANUFACTURER: MANUFACTURER,
+            ATTR_MODEL_ID: self.data.get('Monitor', {}).get('Model'),
+            ATTR_MODEL: DEVICE_MODEL_MAP.get(int(self.data.get('Monitor', {}).get('Model')), ''),
             ATTR_SW_VERSION: self.data.get("Monitor", {}).get("FirmwareVersion", ""),
             ATTR_HW_VERSION: self.data.get("Monitor", {}).get("HardwareVersion", ""),
             ATTR_SERIAL_NUMBER: _get_monitor(self.data).get('SerialNumber')

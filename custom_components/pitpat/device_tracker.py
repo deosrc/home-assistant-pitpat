@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import logging
 from typing import Any, Dict
 
@@ -7,11 +6,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_IDENTIFIERS,
-    ATTR_NAME,
-    ATTR_MANUFACTURER,
-    ATTR_SW_VERSION,
-    ATTR_HW_VERSION,
-    ATTR_SERIAL_NUMBER,
 )
 from homeassistant.components.device_tracker.config_entry import (
     TrackerEntity,
@@ -22,7 +16,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
-    MANUFACTURER,
 )
 from .coordinator import PitPatDataUpdateCoordinator
 
@@ -100,10 +93,5 @@ class PitPatDogDeviceTrackerEntity(CoordinatorEntity[PitPatDataUpdateCoordinator
     def device_info(self):
         """Return device information about this device."""
         return {
-            ATTR_IDENTIFIERS: {(DOMAIN, self._dog_id)},
-            ATTR_NAME: self.data.get('Name'),
-            ATTR_MANUFACTURER: MANUFACTURER,
-            ATTR_SW_VERSION: self.data.get("Monitor", {}).get("FirmwareVersion", ""),
-            ATTR_HW_VERSION: self.data.get("Monitor", {}).get("HardwareVersion", ""),
-            ATTR_SERIAL_NUMBER: _get_monitor(self.data).get('SerialNumber')
+            ATTR_IDENTIFIERS: {(DOMAIN, self._dog_id)}
         }
