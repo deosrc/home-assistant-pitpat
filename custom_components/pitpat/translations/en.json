@@ -56,8 +56,14 @@
       "signal_strength": {
         "name": "Signal Strength"
       },
-      "last_received": {
-        "name": "Last Received"
+      "last_message_sent": {
+        "name": "Last Message Sent"
+      },
+      "last_message_received": {
+        "name": "Last Message Received"
+      },
+      "next_message_expected": {
+        "name": "Next Message Expected"
       },
       "activity_pottering": {
         "name": "Pottering Today"
