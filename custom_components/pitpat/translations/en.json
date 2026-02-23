@@ -114,6 +114,14 @@
       "tracking_start_walk": {
         "name": "Start a Walk"
       }
+    },
+    "device_tracker": {
+      "last_known_position": {
+        "name": "Last Known Position"
+      },
+      "live_position": {
+        "name": "Live Position"
+      }
     }
   }
 }
