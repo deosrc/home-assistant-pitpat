@@ -11,6 +11,11 @@ class InvalidCredentialsError(Exception):
 class PitPatApiClient():
     """API Client for PitPat pet trackers."""
 
+    # __HOST_AUTH = 'http://localhost:5100'
+    # __HOST_API = 'http://localhost:5101'
+    # __HOST_ACTIVITY = 'http://localhost:5102'
+    # __HOST_LOCATION = 'http://localhost:5103'
+
     __HOST_AUTH = 'https://auth.pitpat.com'
     __HOST_API = 'https://api.pitpat.com'
     __HOST_ACTIVITY = 'https://activity.pitpat.com'
