@@ -25,10 +25,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def _get_monitor(data: dict) -> dict:
-    return data.get('monitor_details', {}).get('Value', {})
+    return data.get('monitor_details', {}).get('Value', {}).get('Monitor', {})
 
 def _get_monitor_position(data: dict) -> dict:
-    return _get_monitor(data).get('Monitor', {}).get('LastKnownPosition', {}).get('Value', {})
+    return _get_monitor(data).get('LastKnownPosition', {}).get('Value', {})
 
 def _is_tracking_live(data: dict) -> bool:
     return _get_monitor(data).get('GpsSynchronisationState', 0) == 3
