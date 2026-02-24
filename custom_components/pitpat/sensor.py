@@ -120,12 +120,14 @@ DOG_ENTITY_DESCRIPTIONS = [
     PitPatSensorEntityDescription(
         key="network",
         translation_key="network",
+        icon='mdi:radio-tower',
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: _get_monitor(data).get('Network', {}).get('Value', {}).get('NetworkOperator', {}).get('Value'),
     ),
     PitPatSensorEntityDescription(
         key="signal_strength",
         translation_key="signal_strength",
+        icon='mdi:signal',
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
