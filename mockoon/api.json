@@ -7,8 +7,162 @@
   "port": 5101,
   "hostname": "",
   "folders": [],
-  "routes": [],
-  "rootChildren": [],
+  "routes": [
+    {
+      "uuid": "5635c3b8-0786-4620-ad1f-c85641acc692",
+      "type": "http",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "api/Settings",
+      "responses": [
+        {
+          "uuid": "423eebdd-640d-4f84-b9b0-3355c94b896c",
+          "body": "{\n  \"ApiVersion\": \"3.0.3.0\",\n  \"Issuers\": \"https://Auth.pitpat.com\",\n  \"UserId\": \"00000000-0000-0000-0000-000000000001\",\n  \"MachineName\": \"aa0aaaa000A0A\",\n  \"UserDogTotal\": \"1\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Authenticated",
+          "headers": [
+            {
+              "key": "access-control-allow-headers",
+              "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+            },
+            {
+              "key": "access-control-allow-methods",
+              "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "date",
+              "value": "Tue, 24 Feb 2026 20:56:24 GMT"
+            },
+            {
+              "key": "request-context",
+              "value": "appId=cid-v1:11774a25-fbb1-448c-80aa-c16a3130159f"
+            },
+            {
+              "key": "server",
+              "value": "Kestrel"
+            },
+            {
+              "key": "set-cookie",
+              "value": "ARRAffinity=e124538d85a5c009067c3c29e173354579cd68bdb3ac4d326aac73a14fe39d54;Path=/;HttpOnly;Secure,ARRAffinitySameSite=e124538d85a5c009067c3c29e173354579cd68bdb3ac4d326aac73a14fe39d54;Path=/;HttpOnly;SameSite=None;Secure"
+            },
+            {
+              "key": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "content-length",
+              "value": "178"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "e28f7e4e-28a6-4d47-8e14-e4fe02632b62",
+          "body": "{\n  \"ApiVersion\": \"3.0.3.0\",\n  \"Issuers\": \"https://Auth.pitpat.com\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Anonymous",
+          "headers": [
+            {
+              "key": "access-control-allow-headers",
+              "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+            },
+            {
+              "key": "access-control-allow-methods",
+              "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "date",
+              "value": "Tue, 24 Feb 2026 20:56:24 GMT"
+            },
+            {
+              "key": "request-context",
+              "value": "appId=cid-v1:11774a25-fbb1-448c-80aa-c16a3130159f"
+            },
+            {
+              "key": "server",
+              "value": "Kestrel"
+            },
+            {
+              "key": "set-cookie",
+              "value": "ARRAffinity=e124538d85a5c009067c3c29e173354579cd68bdb3ac4d326aac73a14fe39d54;Path=/;HttpOnly;Secure,ARRAffinitySameSite=e124538d85a5c009067c3c29e173354579cd68bdb3ac4d326aac73a14fe39d54;Path=/;HttpOnly;SameSite=None;Secure"
+            },
+            {
+              "key": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "content-length",
+              "value": "178"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "5635c3b8-0786-4620-ad1f-c85641acc692"
+    }
+  ],
   "proxyMode": true,
   "proxyHost": "https://api.pitpat.com",
   "proxyRemovePrefix": false,
