@@ -15,10 +15,11 @@ from .const import (
 )
 
 PLATFORMS = [
-    "sensor",
     "binary_sensor",
     "button",
     "device_tracker",
+    "select",
+    "sensor",
 ]
 
 _LOGGER = logging.getLogger(__name__)
