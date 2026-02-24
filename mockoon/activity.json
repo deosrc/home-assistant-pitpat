@@ -1,0 +1,143 @@
+{
+  "uuid": "6396b842-72f0-48c4-b2de-697824ae1652",
+  "lastMigration": 33,
+  "name": "PitPat - Activity",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 5102,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "0884c98d-6f6b-4c08-8e13-595686102813",
+      "type": "http",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "api/Users/:userId/Dogs/:dogId/AllActivityDays",
+      "responses": [
+        {
+          "uuid": "564f830b-ff4b-44dd-88e6-2e6b7bd558cd",
+          "body": "[\n  {\n    \"Blocks\": 262,\n    \"DogId\": \"{{ urlParam 'dogId' }}\",\n    \"Date\": \"{{ now 'yyyy-MM-dd' }}T00:00:00Z\",\n    \"TotalWalkMinutes\": {{ faker 'number.int' '{ min:10, max:120 }' }},\n    \"TotalRunMinutes\": {{ faker 'number.int' '{ min:10, max:30 }' }},\n    \"TotalPlayMinutes\": {{ faker 'number.int' '{ min:10, max:12 }' }},\n    \"TotalPotteringMinutes\": {{ faker 'number.int' '{ min:10, max:240 }' }},\n    \"TotalRestMinutes\": {{ faker 'number.int' '{ min:120, max:600 }' }},\n    \"AggregatedEffort\": 15.89,\n    \"TotalCalories\": {{ faker 'number.int' '{ min:100, max:2000 }' }},\n    \"WeightKg\": {{ faker 'number.int' '{ min:10, max:15 }' }},\n    \"UserGoal\": 60,\n    \"RecommendedGoal\": 25,\n    \"Activeness\": {{ faker 'number.int' '{ min:10, max:240 }' }},\n    \"RecommendedGoalAchieved\": {{ boolean }},\n    \"UserGoalAchieved\": {{ boolean }},\n    \"TotalSteps\": {{ faker 'number.int' '{ min:10000, max:40000 }' }},\n    \"TotalDistance\": 3316.6792696253956,\n    \"EarliestDataTime\": \"{{ now 'yyyy-MM-dd' }}T00:00:00Z\",\n    \"LatestDataTime\": \"{{ now 'yyyy-MM-dd' }}T23:23:59Z\",\n    \"SumOfBlockEffortSquares\": 66141,\n    \"UpdateTime\": \"{{ now }}\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "access-control-allow-headers",
+              "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+            },
+            {
+              "key": "access-control-allow-methods",
+              "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "date",
+              "value": "Tue, 24 Feb 2026 21:46:51 GMT"
+            },
+            {
+              "key": "request-context",
+              "value": "appId=cid-v1:c4034689-4a23-4f40-83f4-d4f922e904b1"
+            },
+            {
+              "key": "server",
+              "value": "Microsoft-IIS/10.0"
+            },
+            {
+              "key": "set-cookie",
+              "value": "TiPMix=82.82672775947914; path=/; HttpOnly; Max-Age=3600; Secure; SameSite=None,x-ms-routing-name=self; path=/; HttpOnly; Max-Age=3600; Secure; SameSite=None,ARRAffinity=a23520db97941b3f5b5acd1c839841d3af60115c5c87015f2bcbb95ebd0cda18;Path=/;HttpOnly;Secure,ARRAffinitySameSite=a23520db97941b3f5b5acd1c839841d3af60115c5c87015f2bcbb95ebd0cda18;Path=/;HttpOnly;SameSite=None;Secure"
+            },
+            {
+              "key": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "content-length",
+              "value": "18844"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "0884c98d-6f6b-4c08-8e13-595686102813"
+    }
+  ],
+  "proxyMode": true,
+  "proxyHost": "https://activity.pitpat.com",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    },
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}

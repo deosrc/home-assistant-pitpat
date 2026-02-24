@@ -1,0 +1,383 @@
+{
+  "uuid": "c211d98b-01bf-4bf9-9331-d24f2c01e1f2",
+  "lastMigration": 33,
+  "name": "PitPat - Api",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 5101,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "5635c3b8-0786-4620-ad1f-c85641acc692",
+      "type": "http",
+      "documentation": "Disable when using proxy mode",
+      "method": "get",
+      "endpoint": "api/Settings",
+      "responses": [
+        {
+          "uuid": "423eebdd-640d-4f84-b9b0-3355c94b896c",
+          "body": "{\n  \"ApiVersion\": \"3.0.3.0\",\n  \"Issuers\": \"https://Auth.pitpat.com\",\n  \"UserId\": \"00000000-0000-0000-0000-000000000001\",\n  \"MachineName\": \"aa0aaaa000A0A\",\n  \"UserDogTotal\": \"1\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Authenticated",
+          "headers": [
+            {
+              "key": "access-control-allow-headers",
+              "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+            },
+            {
+              "key": "access-control-allow-methods",
+              "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "date",
+              "value": "Tue, 24 Feb 2026 20:56:24 GMT"
+            },
+            {
+              "key": "request-context",
+              "value": "appId=cid-v1:11774a25-fbb1-448c-80aa-c16a3130159f"
+            },
+            {
+              "key": "server",
+              "value": "Kestrel"
+            },
+            {
+              "key": "set-cookie",
+              "value": "ARRAffinity=e124538d85a5c009067c3c29e173354579cd68bdb3ac4d326aac73a14fe39d54;Path=/;HttpOnly;Secure,ARRAffinitySameSite=e124538d85a5c009067c3c29e173354579cd68bdb3ac4d326aac73a14fe39d54;Path=/;HttpOnly;SameSite=None;Secure"
+            },
+            {
+              "key": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "content-length",
+              "value": "178"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "e28f7e4e-28a6-4d47-8e14-e4fe02632b62",
+          "body": "{\n  \"ApiVersion\": \"3.0.3.0\",\n  \"Issuers\": \"https://Auth.pitpat.com\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Anonymous",
+          "headers": [
+            {
+              "key": "access-control-allow-headers",
+              "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+            },
+            {
+              "key": "access-control-allow-methods",
+              "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "date",
+              "value": "Tue, 24 Feb 2026 20:56:24 GMT"
+            },
+            {
+              "key": "request-context",
+              "value": "appId=cid-v1:11774a25-fbb1-448c-80aa-c16a3130159f"
+            },
+            {
+              "key": "server",
+              "value": "Kestrel"
+            },
+            {
+              "key": "set-cookie",
+              "value": "ARRAffinity=e124538d85a5c009067c3c29e173354579cd68bdb3ac4d326aac73a14fe39d54;Path=/;HttpOnly;Secure,ARRAffinitySameSite=e124538d85a5c009067c3c29e173354579cd68bdb3ac4d326aac73a14fe39d54;Path=/;HttpOnly;SameSite=None;Secure"
+            },
+            {
+              "key": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "content-length",
+              "value": "178"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "dffd467d-0c4a-45e2-aabe-946127dcef6a",
+      "type": "http",
+      "documentation": "Disable when using proxy mode",
+      "method": "get",
+      "endpoint": "api/Users/:userId/Dogs",
+      "responses": [
+        {
+          "uuid": "85217c44-2c28-4c26-8de6-fb2add471b7f",
+          "body": "[\n  {\n    \"Name\": \"Sweep\",\n    \"Breed\": {\n      \"SortRegion\": 0,\n      \"Name\": \"Beagle\",\n      \"Family\": \"Hound\",\n      \"DailyExerciseMinutes\": 60,\n      \"ExerciseLevel\": \"High\",\n      \"MinimumWeightKg\": 8,\n      \"MaximumWeightKg\": 14,\n      \"MinimumSizeCm\": 33,\n      \"MaximumSizeCm\": 40,\n      \"MinimumLifespanYr\": 13,\n      \"MaximumLifespanYr\": 13,\n      \"DefaultStrideLengthM\": 0.6204999999999999,\n      \"Settings\": \"ABAAAFAAODhGPBA=\",\n      \"AdultFromAgeInMonths\": 12,\n      \"SeniorFromAgeInMonths\": 96,\n      \"Id\": \"00000000-0000-0000-0000-000000000001\",\n      \"CreatedAt\": \"1900-01-01T00:00:00Z\",\n      \"LastModified\": \"2018-11-20T11:50:00Z\"\n    },\n    \"Monitor\": {\n      \"ConnectionKey\": \"000000000000\",\n      \"IotHubSymmetricKey\": \"_BlankedLegacyIotHubSymmetricKey\",\n      \"Epoch\": \"2000-01-01T00:00:00Z\",\n      \"IeeeAddress\": \"11:11:11:11:11:11\",\n      \"BatteryVoltage\": null,\n      \"FirmwareVersion\": \"1.3.1\",\n      \"HardwareVersion\": \"6.2.5\",\n      \"Model\": 6,\n      \"MonitorType\": 1,\n      \"Id\": \"00000000-0000-0000-0000-000000000001\",\n      \"CreatedAt\": \"2026-01-30T10:48:28.637Z\",\n      \"LastModified\": \"2026-01-30T10:48:28.637Z\"\n    },\n    \"IsFemale\": {{ boolean }},\n    \"Weight\": {{ faker 'number.int' '{ min: 10, max: 15 }' }},\n    \"WeightUnit\": 0,\n    \"BirthDate\": \"{{ dateFormat (faker 'date.past') 'yyyy-MM-dd' }}T00:00:00.00Z\",\n    \"BirthDateGuess\": false,\n    \"Neutered\": {{ boolean }},\n    \"OverridenGoal\": 60,\n    \"ProfilePhotoId\": \"00000000-0000-0000-0000-000000000001\",\n    \"AddressId\": \"00000000-0000-0000-0000-000000000001\",\n    \"OverriddenStrideLengthM\": 0,\n    \"LastSyncTime\": \"0001-01-01T00:00:00Z\",\n    \"LastSettingsChange\": \"0001-01-01T00:00:00Z\",\n    \"IanaTimeZoneName\": \"Europe/London\",\n    \"IdealWeightKg\": 0,\n    \"InitialWeightKg\": 0,\n    \"IdealWeightSetAtDate\": \"0001-01-01T00:00:00Z\",\n    \"ProportionalWeeklyChange\": 0,\n    \"BaselineWeightKg\": 0,\n    \"BaselineWeightSetAtDate\": \"0001-01-01T00:00:00Z\",\n    \"MembershipId\": null,\n    \"MembershipType\": 0,\n    \"IsVisibleInPack\": false,\n    \"Id\": \"00000000-0000-0000-0000-000000000001\",\n    \"CreatedAt\": \"2026-01-29T14:35:43.143Z\",\n    \"LastModified\": \"2026-02-01T12:44:31.007Z\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "access-control-allow-headers",
+              "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+            },
+            {
+              "key": "access-control-allow-methods",
+              "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "date",
+              "value": "Tue, 24 Feb 2026 21:01:24 GMT"
+            },
+            {
+              "key": "last-modified",
+              "value": "2026-02-01 12:44:31Z"
+            },
+            {
+              "key": "request-context",
+              "value": "appId=cid-v1:11774a25-fbb1-448c-80aa-c16a3130159f"
+            },
+            {
+              "key": "server",
+              "value": "Kestrel"
+            },
+            {
+              "key": "set-cookie",
+              "value": "ARRAffinity=36d552270d56176baa32f460a620fc6225ae8af80b13da7f34f837f6ee041ba2;Path=/;HttpOnly;Secure,ARRAffinitySameSite=36d552270d56176baa32f460a620fc6225ae8af80b13da7f34f837f6ee041ba2;Path=/;HttpOnly;SameSite=None;Secure"
+            },
+            {
+              "key": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "content-length",
+              "value": "2069"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "9fff7c4b-4fac-4f4d-a9a5-61d0e350df96",
+      "type": "http",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "api/Users/:userId/Dogs/:dogId/Monitors",
+      "responses": [
+        {
+          "uuid": "f500ab3a-59cf-4fd4-8a7f-26369b39b0a3",
+          "body": "{\n  \"HasValue\": true,\n  \"Value\": {\n    \"DogId\": \"{{ urlParam 'dogId' }}\",\n    \"Monitor\": {\n      \"CommunicationId\": {{ int }},\n      \"SerialNumber\": \"{{ faker 'string.alphanumeric' '{ casing: \\\"upper\\\", length: 10 }' }}\",\n      \"BatteryInfo\": {\n        \"HasValue\": true,\n        \"Value\": {\n          \"IsCharging\": {{ boolean }},\n          \"BatteryLevelFraction\": {{ float }}\n        }\n      },\n      \"LastKnownPosition\": {\n        \"HasValue\": true,\n        \"Value\": {\n          \"Latitude\": {{ faker 'number.float' '{ min: -90, max: 90 }' }},\n          \"Longitude\": {{ faker 'number.float' '{ min: -180, max: 180 }' }},\n          \"Accuracy\": {\n            \"Metres\": {{ faker 'number.int' '{ min: 0, max: 100 }' }}\n          },\n          \"DataTime\": \"{{ now }}\"\n        }\n      },\n      \"GpsSynchronisationState\": {{ faker 'number.int' '{ min: 0, max: 3}' }},\n      \"ContactTimings\": {\n        \"HasValue\": true,\n        \"Value\": {\n          \"NextMessageExpectedAt\": \"{{ dateTimeShift date=now minutes=5 }}\",\n          \"LastMessageReceivedAt\": \"{{ now }}\",\n          \"LastMessageSentAt\": \"{{ now }}\"\n        }\n      },\n      \"SignalStrength\": {{ faker 'number.int' '{ min: 0, max: 5 }' }},\n      \"LostContactInfo\": {\n        \"HasValue\": false\n      },\n      \"LastActivityTime\": {\n        \"HasValue\": true,\n        \"Value\": \"2026-02-24T21:25:00Z\"\n      },\n      \"PhoneHomeCadence\": 2,\n      \"LiveTrackingReason\": {{ faker 'number.int' '{ min: 0, max: 2 }' }},\n      \"Network\": {\n        \"HasValue\": true,\n        \"Value\": {\n          \"Quality\": 1,\n          \"Protocol\": 1,\n          \"HasRapidWakeup\": true,\n          \"NetworkOperator\": {\n            \"HasValue\": true,\n            \"Value\": \"EE\"\n          }\n        }\n      },\n      \"Id\": \"00000000-0000-0000-0000-000000000001\",\n      \"MonitorVersion\": {\n        \"Model\": 6,\n        \"Firmware\": {\n          \"HasValue\": true,\n          \"Value\": \"1.3.1\"\n        },\n        \"Hardware\": {\n          \"HasValue\": true,\n          \"Value\": \"6.2.5\"\n        },\n        \"IsUnknown\": false\n      },\n      \"DisabledReason\": {\n        \"HasValue\": false\n      },\n      \"SubscriptionId\": {\n        \"HasValue\": false\n      },\n      \"Type\": \"Cellular\"\n    }\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "access-control-allow-headers",
+              "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+            },
+            {
+              "key": "access-control-allow-methods",
+              "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+            },
+            {
+              "key": "access-control-allow-origin",
+              "value": "*"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "date",
+              "value": "Tue, 24 Feb 2026 21:29:00 GMT"
+            },
+            {
+              "key": "request-context",
+              "value": "appId=cid-v1:11774a25-fbb1-448c-80aa-c16a3130159f"
+            },
+            {
+              "key": "server",
+              "value": "Kestrel"
+            },
+            {
+              "key": "set-cookie",
+              "value": "ARRAffinity=da3bcf518ec02157595e5490f87a0a61e687b95bb8edc0fbc62e246d3b8c64ae;Path=/;HttpOnly;Secure,ARRAffinitySameSite=da3bcf518ec02157595e5490f87a0a61e687b95bb8edc0fbc62e246d3b8c64ae;Path=/;HttpOnly;SameSite=None;Secure"
+            },
+            {
+              "key": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "key": "x-powered-by",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "content-length",
+              "value": "1921"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "5635c3b8-0786-4620-ad1f-c85641acc692"
+    },
+    {
+      "type": "route",
+      "uuid": "dffd467d-0c4a-45e2-aabe-946127dcef6a"
+    },
+    {
+      "type": "route",
+      "uuid": "9fff7c4b-4fac-4f4d-a9a5-61d0e350df96"
+    }
+  ],
+  "proxyMode": true,
+  "proxyHost": "https://api.pitpat.com",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    },
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}
