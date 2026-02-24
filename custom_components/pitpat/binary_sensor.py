@@ -13,6 +13,7 @@ from homeassistant.const import (
     ATTR_SERIAL_NUMBER,
 )
 from homeassistant.components.binary_sensor import (
+    BinarySensorDeviceClass,
     BinarySensorEntity,
     BinarySensorEntityDescription,
 )
@@ -41,6 +42,12 @@ DOG_ENTITY_DESCRIPTIONS = [
         key="live_tracking_active",
         translation_key="live_tracking_active",
         value_fn=lambda data: _get_monitor(data).get('LiveTrackingReason', 0) != 0,
+    ),
+    PitPatBinarySensorEntityDescription(
+        key="charging_status",
+        translation_key="charging_status",
+        device_class=BinarySensorDeviceClass.BATTERY_CHARGING,
+        value_fn=lambda data: bool(_get_monitor(data).get('BatteryInfo', {}).get('Value', {}).get('IsCharging', False)),
     ),
 ]
 

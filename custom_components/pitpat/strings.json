@@ -102,6 +102,9 @@
     "binary_sensor": {
       "live_tracking_active": {
         "name": "Live Tracking"
+      },
+      "charging_status": {
+        "name": "Charging Status"
       }
     },
     "button": {
