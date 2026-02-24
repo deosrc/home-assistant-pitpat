@@ -7,8 +7,115 @@
   "port": 5103,
   "hostname": "",
   "folders": [],
-  "routes": [],
-  "rootChildren": [],
+  "routes": [
+    {
+      "uuid": "1e720c02-4fb1-4730-80a8-297c757d375e",
+      "type": "http",
+      "documentation": "Stop tracking",
+      "method": "put",
+      "endpoint": "api/user/:userID/dog/:dogId/livetracking/stop",
+      "responses": [
+        {
+          "uuid": "8e75c612-b5cd-44ba-a144-dcb0915af6c3",
+          "body": "",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "32e32451-d0cf-4178-87fd-32e809a15a28",
+      "type": "http",
+      "documentation": "Start a walk",
+      "method": "put",
+      "endpoint": "api/user/:userId/dog/:dogId/livetracking/start/walk",
+      "responses": [
+        {
+          "uuid": "784ccd2e-a124-4bc6-bd70-053ccf215a9d",
+          "body": "",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "7d2eb97d-b71f-46b2-be59-0d395bc301bb",
+      "type": "http",
+      "documentation": "Find my dog",
+      "method": "put",
+      "endpoint": "api/user/:userId/dog/:dogId/livetracking/start/find",
+      "responses": [
+        {
+          "uuid": "5033103d-f56b-479a-9dca-9c077b169b18",
+          "body": "",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "1e720c02-4fb1-4730-80a8-297c757d375e"
+    },
+    {
+      "type": "route",
+      "uuid": "32e32451-d0cf-4178-87fd-32e809a15a28"
+    },
+    {
+      "type": "route",
+      "uuid": "7d2eb97d-b71f-46b2-be59-0d395bc301bb"
+    }
+  ],
   "proxyMode": true,
   "proxyHost": "https://location.pitpat.com",
   "proxyRemovePrefix": false,
