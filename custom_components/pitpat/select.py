@@ -14,12 +14,17 @@ from propcache import cached_property
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
+    PHONE_HOME_CADENCE_MAP,
 )
 from .coordinator import PitPatDataUpdateCoordinator
 
 
 def _get_monitor(data: dict) -> dict:
     return data.get('monitor_details', {}).get('Value', {}).get('Monitor', {})
+
+def _get_phone_home_cadence(data: dict) -> str | None:
+    raw_value = _get_monitor(data).get('PhoneHomeCadence', 1)
+    return PHONE_HOME_CADENCE_MAP.get(raw_value, PHONE_HOME_CADENCE_MAP[1])
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatSelectEntityDescription(SelectEntityDescription):
@@ -31,8 +36,8 @@ ENTITY_DESCRIPTIONS = [
         key='phone_home_cadence',
         translation_key='phone_home_cadence',
         icon='mdi:mail-fast-outline',
-        options=['0','1','2'],
-        current_option_fn=lambda data: _get_monitor(data).get('PhoneHomeCadence', 1)
+        options=list(PHONE_HOME_CADENCE_MAP.values()),
+        current_option_fn=lambda data: _get_phone_home_cadence(data)
     )
 ]
 

@@ -13,3 +13,9 @@ UPDATE_INTERVAL_DEFAULT = 5
 DEVICE_MODEL_MAP: Dict[int, str] = {
     6: 'GPS Tracker'
 }
+
+PHONE_HOME_CADENCE_MAP: Dict[int, str] = {
+    0: 'Economy',
+    1: 'Standard',
+    2: 'Urgent',
+}
