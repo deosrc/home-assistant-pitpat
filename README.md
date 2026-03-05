@@ -52,7 +52,6 @@ As mentioned, this is highly experiment, and is a small hobby project. If you ru
 
 ## How can I help?
 
-- If your PCAP capture manages to decrypt the `auth.pitpat.com` requests, I would be very interested in seeing them (obviously with sensitive parts redacted).
 - Any other investigation into workings of the APIs.
 - Investigating any issues you encounter. My testing is fairly limited due to time and only having a single device.
 - Reporting issues including any logs.
