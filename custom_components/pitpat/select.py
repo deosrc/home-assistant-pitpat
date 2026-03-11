@@ -8,6 +8,7 @@ from homeassistant.components.select import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_IDENTIFIERS
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from propcache import cached_property
 
@@ -30,6 +31,7 @@ def _get_phone_home_cadence(data: dict) -> str | None:
 class PitPatSelectEntityDescription(SelectEntityDescription):
     current_option_fn: Callable[[dict], str | None]
     attributes_fn: Callable[[dict], dict | None] = None
+    update_fn: Callable[[PitPatDataUpdateCoordinator, str], None]
 
 ENTITY_DESCRIPTIONS = [
     PitPatSelectEntityDescription(
@@ -37,7 +39,8 @@ ENTITY_DESCRIPTIONS = [
         translation_key='phone_home_cadence',
         icon='mdi:mail-fast-outline',
         options=list(PHONE_HOME_CADENCE_MAP.values()),
-        current_option_fn=lambda data: _get_phone_home_cadence(data)
+        current_option_fn=lambda data: _get_phone_home_cadence(data),
+        update_fn=lambda api, dog_id, option: api.async_update_phone_home_cadence(dog_id, option),
     )
 ]
 
@@ -106,3 +109,9 @@ class PitPatSelectEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], SelectE
         return {
             ATTR_IDENTIFIERS: {(DOMAIN, self._dog_id)},
         }
+
+    async def async_select_option(self, option: str):
+        try:
+            await self.description.update_fn(self.coordinator.api_client, self._dog_id, option)
+        except Exception as e:
+            raise HomeAssistantError(f'Failed to update phone home cadence.') from e
