@@ -105,6 +105,9 @@
       },
       "charging_status": {
         "name": "Charging Status"
+      },
+      "user_goal_achieved": {
+        "name": "Goal Achieved"
       }
     },
     "button": {
