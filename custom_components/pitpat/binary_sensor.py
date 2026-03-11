@@ -49,6 +49,12 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=BinarySensorDeviceClass.BATTERY_CHARGING,
         value_fn=lambda data: bool(_get_monitor(data).get('BatteryInfo', {}).get('Value', {}).get('IsCharging', False)),
     ),
+    PitPatBinarySensorEntityDescription(
+        key='user_goal_achieved',
+        translation_key='user_goal_achieved',
+        icon="mdi:flag-checkered",
+        value_fn=lambda data: bool(data.get('activity_today', {}).get('UserGoalAchieved', False))
+    )
 ]
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities):
