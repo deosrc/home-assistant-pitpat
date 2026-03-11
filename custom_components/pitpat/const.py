@@ -15,7 +15,7 @@ DEVICE_MODEL_MAP: Dict[int, str] = {
 }
 
 PHONE_HOME_CADENCE_MAP: Dict[int, str] = {
-    0: 'Economy',
-    1: 'Standard',
+    1: 'Economy',
+    0: 'Standard',
     2: 'Urgent',
 }
