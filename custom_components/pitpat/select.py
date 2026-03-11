@@ -37,7 +37,7 @@ ENTITY_DESCRIPTIONS = [
     PitPatSelectEntityDescription(
         key='phone_home_cadence',
         translation_key='phone_home_cadence',
-        icon='mdi:mail-fast-outline',
+        icon='mdi:email-fast-outline',
         options=list(PHONE_HOME_CADENCE_MAP.values()),
         current_option_fn=lambda data: _get_phone_home_cadence(data),
         update_fn=lambda api, dog_id, option: api.async_update_phone_home_cadence(dog_id, option),
