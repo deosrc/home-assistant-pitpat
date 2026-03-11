@@ -1,24 +1,15 @@
 from dataclasses import dataclass
-import logging
 from typing import Any, Callable, Dict
 
 import dateutil
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
-    ATTR_MODEL,
-    ATTR_MODEL_ID,
     EntityCategory,
     UnitOfEnergy,
     UnitOfLength,
     UnitOfMass,
     UnitOfTime,
-    ATTR_IDENTIFIERS,
-    ATTR_NAME,
-    ATTR_MANUFACTURER,
-    ATTR_SW_VERSION,
-    ATTR_HW_VERSION,
-    ATTR_SERIAL_NUMBER,
     PERCENTAGE,
 )
 from homeassistant.components.sensor import (
@@ -27,18 +18,14 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     DATA_KEY_COORDINATOR,
-    DEVICE_MODEL_MAP,
     DOMAIN,
-    MANUFACTURER,
 )
 from .coordinator import PitPatDataUpdateCoordinator
+from .entity import PitPatDogEntity
 
-
-_LOGGER = logging.getLogger(__name__)
 
 def _get_monitor(data: dict) -> dict:
     return data.get('monitor_details', {}).get('Value', {}).get('Monitor', {})
@@ -276,63 +263,27 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
 
     async_add_entities(sensors, True)
 
-class PitPatDogSensorEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], SensorEntity):
+class PitPatDogSensorEntity(PitPatDogEntity, SensorEntity):
 
     _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
-
-    def __init__(self, coordinator: PitPatDataUpdateCoordinator, dog_id: str, description: PitPatSensorEntityDescription):
-        CoordinatorEntity.__init__(self, coordinator)
-        self._dog_id = dog_id
-        self.entity_description = description
-
-        # Required for HA 2022.7
-        self.coordinator_context = object()
-
-    @property
-    def unique_id(self) -> str:
-        return f'{self._dog_id}-{self.description.key}'
 
     @property
     def description(self) -> PitPatSensorEntityDescription:
         return self.entity_description
 
     @property
-    def data(self):
-        return self.coordinator.dogs.get(self._dog_id)
-
-    @property
     def native_value(self):
         try:
-            return self.description.value_fn(self.data)
+            return self.description.value_fn(self.data_dog)
         except Exception as e:
             raise ValueError(f"Unable to get value for {self.entity_description.key} sensor entity for dog id {self._dog_id}") from e
 
     @property
-    def base_attributes(self) -> Dict[str, Any] | None:
-        return {
-            "dog_id": self._dog_id,
-        }
-
-    @property
     def extra_state_attributes(self) -> Dict[str, Any] | None:
         try:
-            attributes = self.base_attributes
+            attributes = super().extra_state_attributes
             if self.description.attributes_fn:
                 attributes = {**attributes, **self.description.attributes_fn(self.data)}
             return attributes
         except Exception as e:
             raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self._dog_id}") from e
-
-    @property
-    def device_info(self):
-        """Return device information about this device."""
-        return {
-            ATTR_IDENTIFIERS: {(DOMAIN, self._dog_id)},
-            ATTR_NAME: self.data.get('Name'),
-            ATTR_MANUFACTURER: MANUFACTURER,
-            ATTR_MODEL_ID: self.data.get('Monitor', {}).get('Model'),
-            ATTR_MODEL: DEVICE_MODEL_MAP.get(int(self.data.get('Monitor', {}).get('Model')), ''),
-            ATTR_SW_VERSION: self.data.get("Monitor", {}).get("FirmwareVersion", ""),
-            ATTR_HW_VERSION: self.data.get("Monitor", {}).get("HardwareVersion", ""),
-            ATTR_SERIAL_NUMBER: _get_monitor(self.data).get('SerialNumber')
-        }
