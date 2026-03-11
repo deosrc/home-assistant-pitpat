@@ -114,5 +114,5 @@ class PitPatSelectEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], SelectE
         try:
             await self.description.update_fn(self.coordinator.api_client, self._dog_id, option)
             await self.coordinator.async_request_refresh()
-        except Exception as e:
-            raise HomeAssistantError(f'Failed to update phone home cadence.') from e
+        except Exception as err:
+            raise HomeAssistantError(f'Failed to update phone home cadence.') from err
