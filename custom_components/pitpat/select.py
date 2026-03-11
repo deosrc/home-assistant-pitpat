@@ -6,7 +6,7 @@ from homeassistant.components.select import (
     SelectEntityDescription,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_IDENTIFIERS
+from homeassistant.const import ATTR_IDENTIFIERS, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -39,6 +39,7 @@ ENTITY_DESCRIPTIONS = [
         key='phone_home_cadence',
         translation_key='phone_home_cadence',
         icon='mdi:email-fast-outline',
+        entity_category=EntityCategory.CONFIG,
         options=list(PHONE_HOME_CADENCE_MAP.values()),
         current_option_fn=lambda data: _get_phone_home_cadence(data),
         update_fn=lambda api, dog_id, option: api.async_update_phone_home_cadence(dog_id, option),
