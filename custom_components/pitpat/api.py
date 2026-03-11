@@ -241,7 +241,7 @@ class PitPatApiClient():
 
         await self.async_ensure_user_id_present()
         result = await self._session.put(
-            f'{PitPatApiClient.__HOST_LOCATION}/api/user/{self.__user_id}/dog/{dog_id}/monitor/updatePermanentCadence?={value}',
+            f'{PitPatApiClient.__HOST_LOCATION}/api/user/{self.__user_id}/dog/{dog_id}/monitor/updatePermanentCadence?cadence={value}',
             headers=self.default_headers)
 
         result.raise_for_status()
