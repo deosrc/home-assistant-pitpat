@@ -27,12 +27,8 @@ from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
 
 
-def _get_monitor(data: dict) -> dict:
-    return data.get('monitor_details', {}).get('Value', {}).get('Monitor', {})
-
-def _get_tracking_mode(data: dict):
-    monitor = _get_monitor(data)
-    reason_id = monitor.get('LiveTrackingReason', 0)
+def _get_tracking_mode(entity: PitPatDogEntity):
+    reason_id = entity.data_monitor.get('LiveTrackingReason', 0)
     if reason_id == 1:
         return 'Find my dog'
     elif reason_id == 2:
@@ -40,9 +36,8 @@ def _get_tracking_mode(data: dict):
     else:
         return 'None'
 
-def _get_tracking_status(data: dict):
-    monitor = _get_monitor(data)
-    reason_id = monitor.get('GpsSynchronisationState', 0)
+def _get_tracking_status(entity: PitPatDogEntity):
+    reason_id = entity.data_monitor.get('GpsSynchronisationState', 0)
     if reason_id == 0:
         return 'Not tracking'
     elif reason_id == 1:
@@ -56,34 +51,34 @@ def _get_tracking_status(data: dict):
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatSensorEntityDescription(SensorEntityDescription):
-    value_fn: Callable[[dict], str | int | float | None]
-    attributes_fn: Callable[[dict], dict | None] = None
+    value_fn: Callable[[PitPatDogEntity], str | int | float | None]
+    attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
 
 DOG_ENTITY_DESCRIPTIONS = [
     PitPatSensorEntityDescription(
         key="breed",
         translation_key="breed",
         icon="mdi:dog-side",
-        value_fn=lambda data: data.get('Breed', {}).get('Name'),
+        value_fn=lambda entity: entity.data_dog.get('Breed', {}).get('Name'),
     ),
     PitPatSensorEntityDescription(
         key="family",
         translation_key="family",
         icon="mdi:dog-side",
-        value_fn=lambda data: data.get('Breed', {}).get('Family'),
+        value_fn=lambda entity: entity.data_dog.get('Breed', {}).get('Family'),
     ),
     PitPatSensorEntityDescription(
         key="gender",
         translation_key="gender",
         icon="mdi:gender-male-female",
-        value_fn=lambda data: 'Female' if data.get('IsFemale', {}) else 'Male',
+        value_fn=lambda entity: 'Female' if entity.data_dog.get('IsFemale', {}) else 'Male',
     ),
     PitPatSensorEntityDescription(
         key="date_of_birth",
         translation_key="date_of_birth",
         icon="mdi:calendar",
         device_class=SensorDeviceClass.DATE,
-        value_fn=lambda data: dateutil.parser.parse(data.get('BirthDate')).date(),
+        value_fn=lambda entity: dateutil.parser.parse(entity.data_dog.get('BirthDate')).date(),
     ),
     PitPatSensorEntityDescription(
         key="weight",
@@ -92,7 +87,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfMass.KILOGRAMS, # TODO: Make sure this is correct based on user settings
         suggested_display_precision=1,
-        value_fn=lambda data: data.get('Weight'),
+        value_fn=lambda entity: entity.data_dog.get('Weight'),
     ),
     PitPatSensorEntityDescription(
         key="battery_level",
@@ -102,14 +97,14 @@ DOG_ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda data: _get_monitor(data).get('BatteryInfo', {}).get('Value', {}).get('BatteryLevelFraction') * 100,
+        value_fn=lambda entity: entity.data_monitor.get('BatteryInfo', {}).get('Value', {}).get('BatteryLevelFraction') * 100,
     ),
     PitPatSensorEntityDescription(
         key="network",
         translation_key="network",
         icon='mdi:radio-tower',
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda data: _get_monitor(data).get('Network', {}).get('Value', {}).get('NetworkOperator', {}).get('Value'),
+        value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('NetworkOperator', {}).get('Value'),
     ),
     PitPatSensorEntityDescription(
         key="signal_strength",
@@ -119,7 +114,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda data: _get_monitor(data).get('Network', {}).get('Value', {}).get('Quality') * 20,
+        value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality') * 20,
     ),
     PitPatSensorEntityDescription(
         key="last_message_sent",
@@ -127,7 +122,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-arrow-right-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda data: dateutil.parser.parse(_get_monitor(data).get('ContactTimings', {}).get('Value', {}).get('LastMessageSentAt')),
+        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageSentAt')),
     ),
     PitPatSensorEntityDescription(
         key="last_message_received",
@@ -135,7 +130,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-arrow-left-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda data: dateutil.parser.parse(_get_monitor(data).get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')),
+        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')),
     ),
     PitPatSensorEntityDescription(
         key="next_message_expected",
@@ -143,7 +138,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-fast-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda data: dateutil.parser.parse(_get_monitor(data).get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')),
+        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')),
     ),
     PitPatSensorEntityDescription(
         key="activity_pottering",
@@ -153,7 +148,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
         suggested_unit_of_measurement=UnitOfTime.HOURS,
-        value_fn=lambda data: data.get('activity_today', {}).get('TotalPotteringMinutes', 0),
+        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalPotteringMinutes', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_running",
@@ -162,7 +157,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
-        value_fn=lambda data: data.get('activity_today', {}).get('TotalRunMinutes', 0),
+        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalRunMinutes', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_walking",
@@ -171,7 +166,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
-        value_fn=lambda data: data.get('activity_today', {}).get('TotalWalkMinutes', 0),
+        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalWalkMinutes', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_playing",
@@ -180,7 +175,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
-        value_fn=lambda data: data.get('activity_today', {}).get('TotalPlayMinutes', 0),
+        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalPlayMinutes', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_resting",
@@ -190,7 +185,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
         suggested_unit_of_measurement=UnitOfTime.HOURS,
-        value_fn=lambda data: data.get('activity_today', {}).get('TotalRestMinutes', 0),
+        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalRestMinutes', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_total_exercising",
@@ -199,7 +194,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
-        value_fn=lambda data: data.get('activity_today', {}).get('Activeness', 0),
+        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('Activeness', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_steps",
@@ -207,7 +202,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:paw",
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement="steps",
-        value_fn=lambda data: data.get('activity_today', {}).get('TotalSteps', 0),
+        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalSteps', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_distance",
@@ -218,7 +213,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         native_unit_of_measurement=UnitOfLength.METERS,
         suggested_unit_of_measurement=UnitOfLength.KILOMETERS,
         suggested_display_precision=0,
-        value_fn=lambda data: data.get('activity_today', {}).get('TotalDistance', 0),
+        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalDistance', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_calories",
@@ -227,7 +222,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.KILO_CALORIE,
-        value_fn=lambda data: data.get('activity_today', {}).get('TotalCalories', 0),
+        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalCalories', 0),
     ),
     PitPatSensorEntityDescription(
         key="user_goal_progress",
@@ -236,19 +231,19 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda data: (data.get('activity_today', {}).get('Activeness', 0) / data.get('activity_today', {}).get('UserGoal', 0)) * 100,
+        value_fn=lambda entity: (entity.data_dog.get('activity_today', {}).get('Activeness', 0) / entity.data_dog.get('activity_today', {}).get('UserGoal', 0)) * 100,
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_mode",
         translation_key="live_tracking_mode",
         icon="mdi:map-marker-radius",
-        value_fn=lambda data: _get_tracking_mode(data),
+        value_fn=lambda entity: _get_tracking_mode(entity),
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_status",
         translation_key="live_tracking_status",
         icon="mdi:satellite-variant",
-        value_fn=lambda data: _get_tracking_status(data),
+        value_fn=lambda entity: _get_tracking_status(entity),
     ),
 ]
 
@@ -274,7 +269,7 @@ class PitPatDogSensorEntity(PitPatDogEntity, SensorEntity):
     @property
     def native_value(self):
         try:
-            return self.description.value_fn(self.data_dog)
+            return self.description.value_fn(self)
         except Exception as e:
             raise ValueError(f"Unable to get value for {self.entity_description.key} sensor entity for dog id {self._dog_id}") from e
 
@@ -283,7 +278,7 @@ class PitPatDogSensorEntity(PitPatDogEntity, SensorEntity):
         try:
             attributes = super().extra_state_attributes
             if self.description.attributes_fn:
-                attributes = {**attributes, **self.description.attributes_fn(self.data)}
+                attributes = {**attributes, **self.description.attributes_fn(self)}
             return attributes
         except Exception as e:
             raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self._dog_id}") from e
