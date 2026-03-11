@@ -248,6 +248,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:flag-checkered",
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=PERCENTAGE,
+        suggested_display_precision=0,
         value_fn=lambda data: (data.get('activity_today', {}).get('Activeness', 0) / data.get('activity_today', {}).get('UserGoal', 0)) * 100,
     ),
     PitPatSensorEntityDescription(
