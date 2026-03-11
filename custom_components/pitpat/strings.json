@@ -97,6 +97,9 @@
       },
       "live_tracking_status": {
         "name": "Live Tracking Status"
+      },
+      "user_goal_progress": {
+        "name": "Goal Progress"
       }
     },
     "binary_sensor": {
