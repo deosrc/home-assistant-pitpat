@@ -5,8 +5,7 @@ from homeassistant.core import DOMAIN
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from custom_components.pitpat.const import DEVICE_MODEL_MAP, MANUFACTURER
-
+from .const import DEVICE_MODEL_MAP, MANUFACTURER
 from .coordinator import PitPatDataUpdateCoordinator
 
 

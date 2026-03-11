@@ -1,27 +1,20 @@
 from dataclasses import dataclass
-import logging
 from typing import Any, Callable, Dict
 
 import dateutil
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    ATTR_IDENTIFIERS,
-)
 from homeassistant.components.device_tracker.config_entry import (
     TrackerEntity,
     TrackerEntityDescription
 )
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
 )
 from .coordinator import PitPatDataUpdateCoordinator
-
-
-_LOGGER = logging.getLogger(__name__)
+from .entity import PitPatDogEntity
 
 
 def _get_monitor(data: dict) -> dict:
@@ -75,77 +68,48 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
 
     async_add_entities(sensors, True)
 
-class PitPatDogDeviceTrackerEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], TrackerEntity):
+class PitPatDogDeviceTrackerEntity(PitPatDogEntity, TrackerEntity):
 
     _attr_has_entity_name = True
-
-    def __init__(self, coordinator: PitPatDataUpdateCoordinator, dog_id: str, description: PitPatTrackerEntityDescription):
-        CoordinatorEntity.__init__(self, coordinator)
-        self._dog_id = dog_id
-        self.entity_description = description
-
-        # Required for HA 2022.7
-        self.coordinator_context = object()
-
-    @property
-    def unique_id(self) -> str:
-        return f'{self._dog_id}-{self.entity_description.key}'
 
     @property
     def description(self) -> PitPatTrackerEntityDescription:
         return self.entity_description
 
     @property
-    def data(self):
-        return self.coordinator.dogs.get(self._dog_id)
-
-    @property
     def available(self) -> bool:
         try:
-            return self.description.available_fn(self.data)
+            return self.description.available_fn(self.data_dog)
         except Exception as e:
             raise ValueError(f"Unable to get availability value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
 
     @property
     def latitude(self) -> float | None:
         try:
-            return self.description.latitude_fn(self.data)
+            return self.description.latitude_fn(self.data_dog)
         except Exception as e:
             raise ValueError(f"Unable to get latitude value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
 
     @property
     def longitude(self) -> float | None:
         try:
-            return self.description.longitude_fn(self.data)
+            return self.description.longitude_fn(self.data_dog)
         except Exception as e:
             raise ValueError(f"Unable to get longitude value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
 
     @property
     def location_accuracy(self) -> float | None:
         try:
-            return self.description.accuracy_fn(self.data)
+            return self.description.accuracy_fn(self.data_dog)
         except Exception as e:
             raise ValueError(f"Unable to get accuracy value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
 
     @property
-    def base_attributes(self) -> Dict[str, Any] | None:
-        return {
-            "dog_id": self._dog_id,
-        }
-
-    @property
     def extra_state_attributes(self) -> Dict[str, Any] | None:
         try:
-            attributes = self.base_attributes
+            attributes = super().extra_state_attributes
             if self.description.attributes_fn:
-                attributes = {**attributes, **self.description.attributes_fn(self.data)}
+                attributes = {**attributes, **self.description.attributes_fn(self.data_dog)}
             return attributes
         except Exception as e:
             raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self._dog_id}") from e
-
-    @property
-    def device_info(self):
-        """Return device information about this device."""
-        return {
-            ATTR_IDENTIFIERS: {(DOMAIN, self._dog_id)}
-        }
