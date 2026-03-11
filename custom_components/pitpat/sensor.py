@@ -243,6 +243,15 @@ DOG_ENTITY_DESCRIPTIONS = [
         value_fn=lambda data: data.get('activity_today', {}).get('TotalCalories', 0),
     ),
     PitPatSensorEntityDescription(
+        key="user_goal_progress",
+        translation_key="user_goal_progress",
+        icon="mdi:flag-checkered",
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement=PERCENTAGE,
+        suggested_display_precision=0,
+        value_fn=lambda data: (data.get('activity_today', {}).get('Activeness', 0) / data.get('activity_today', {}).get('UserGoal', 0)) * 100,
+    ),
+    PitPatSensorEntityDescription(
         key="live_tracking_mode",
         translation_key="live_tracking_mode",
         icon="mdi:map-marker-radius",
