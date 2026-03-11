@@ -12,6 +12,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from propcache import cached_property
 
+from .api import PitPatApiClient
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
@@ -31,7 +32,7 @@ def _get_phone_home_cadence(data: dict) -> str | None:
 class PitPatSelectEntityDescription(SelectEntityDescription):
     current_option_fn: Callable[[dict], str | None]
     attributes_fn: Callable[[dict], dict | None] = None
-    update_fn: Callable[[PitPatDataUpdateCoordinator, str], None]
+    update_fn: Callable[[PitPatApiClient, str, str], None]
 
 ENTITY_DESCRIPTIONS = [
     PitPatSelectEntityDescription(
