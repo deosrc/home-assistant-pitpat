@@ -57,8 +57,12 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         """Fetch data"""
         try:
             await self._async_refresh_data()
+        except ConfigEntryAuthFailed as err:
+            _LOGGER.info('API client is not authenticated. Attempting to re-authenticate.', exc_info=err)
+            self.api_client = None
+            await self._async_refresh_data()
         except Exception as err:
-            _LOGGER.warning('Request failed. Attempting to re-authenticate.', exc_info=err)
+            _LOGGER.warning('Request failed. Retrying with new API client.', exc_info=err)
             self.api_client = None
             await self._async_refresh_data()
 
