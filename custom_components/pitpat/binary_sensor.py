@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-import logging
 from typing import Any, Callable, Dict
 
 from homeassistant.core import HomeAssistant
@@ -18,33 +17,28 @@ from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
 
 
-_LOGGER = logging.getLogger(__name__)
-
-def _get_monitor(data: dict) -> dict:
-    return data.get('monitor_details', {}).get('Value', {}).get('Monitor', {})
-
 @dataclass(frozen=True, kw_only=True)
 class PitPatBinarySensorEntityDescription(BinarySensorEntityDescription):
-    value_fn: Callable[[dict], str | int | float | None]
-    attributes_fn: Callable[[dict], dict | None] = None
+    value_fn: Callable[[PitPatDogEntity], str | int | float | None]
+    attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
 
 DOG_ENTITY_DESCRIPTIONS = [
     PitPatBinarySensorEntityDescription(
         key="live_tracking_active",
         translation_key="live_tracking_active",
-        value_fn=lambda data: _get_monitor(data).get('LiveTrackingReason', 0) != 0,
+        value_fn=lambda entity: entity.data_monitor.get('LiveTrackingReason', 0) != 0,
     ),
     PitPatBinarySensorEntityDescription(
         key="charging_status",
         translation_key="charging_status",
         device_class=BinarySensorDeviceClass.BATTERY_CHARGING,
-        value_fn=lambda data: bool(_get_monitor(data).get('BatteryInfo', {}).get('Value', {}).get('IsCharging', False)),
+        value_fn=lambda entity: bool(entity.data_monitor.get('BatteryInfo', {}).get('Value', {}).get('IsCharging', False)),
     ),
     PitPatBinarySensorEntityDescription(
         key='user_goal_achieved',
         translation_key='user_goal_achieved',
         icon="mdi:flag-checkered",
-        value_fn=lambda data: bool(data.get('activity_today', {}).get('UserGoalAchieved', False))
+        value_fn=lambda entity: bool(entity.data_dog.get('activity_today', {}).get('UserGoalAchieved', False))
     )
 ]
 
@@ -70,7 +64,7 @@ class PitPatDogBinarySensorEntity(PitPatDogEntity, BinarySensorEntity):
     @property
     def is_on(self):
         try:
-            return self.description.value_fn(self.data_dog)
+            return self.description.value_fn(self)
         except Exception as e:
             raise ValueError(f"Unable to get value for {self.entity_description.key} binary sensor entity for dog id {self._dog_id}") from e
 
@@ -79,7 +73,7 @@ class PitPatDogBinarySensorEntity(PitPatDogEntity, BinarySensorEntity):
         try:
             attributes = super().extra_state_attributes
             if self.description.attributes_fn:
-                attributes = {**attributes, **self.description.attributes_fn(self.data_dog)}
+                attributes = {**attributes, **self.description.attributes_fn(self)}
             return attributes
         except Exception as e:
             raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self._dog_id}") from e
