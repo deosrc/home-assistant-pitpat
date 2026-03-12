@@ -100,6 +100,37 @@
       "responseMode": null,
       "streamingMode": null,
       "streamingInterval": 0
+    },
+    {
+      "uuid": "53620e12-abbd-4444-9ad5-3d37fd7a002c",
+      "type": "http",
+      "documentation": "Change phone home cadence",
+      "method": "put",
+      "endpoint": "api/user/:userId/dog/:dogId/monitor/updatePermanentCadence",
+      "responses": [
+        {
+          "uuid": "eee90922-44f0-42a5-8ca6-fcdb7df3f114",
+          "body": "",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     }
   ],
   "rootChildren": [
@@ -114,6 +145,10 @@
     {
       "type": "route",
       "uuid": "7d2eb97d-b71f-46b2-be59-0d395bc301bb"
+    },
+    {
+      "type": "route",
+      "uuid": "53620e12-abbd-4444-9ad5-3d37fd7a002c"
     }
   ],
   "proxyMode": true,

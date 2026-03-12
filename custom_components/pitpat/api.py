@@ -147,7 +147,7 @@ class PitPatApiClient():
         result.raise_for_status()
         return await result.json()
 
-    async def async_get_monitor(self, dog_id) -> Dict[str, dict]:
+    async def async_get_monitor(self, dog_id: str) -> Dict[str, dict]:
         """
         Retrieve information for a monitor registered to the account.
 
@@ -165,7 +165,7 @@ class PitPatApiClient():
         result.raise_for_status()
         return await result.json()
 
-    async def async_get_all_activity_days(self, dog_id) -> List[Dict[str, dict]]:
+    async def async_get_all_activity_days(self, dog_id: str) -> List[Dict[str, dict]]:
         """
         Retrieve information for activity by day.
 
@@ -183,20 +183,23 @@ class PitPatApiClient():
         result.raise_for_status()
         return await result.json()
 
-    async def async_tracking_stop(self, dog_id) -> None:
+    async def async_tracking_stop(self, dog_id: str) -> None:
         """
         Stops active tracking.
 
         :param dog_id: The Id for the dog the monitor is registered to.
         """
+        _LOGGER.debug('Stopping tracking')
+
         await self.async_ensure_user_id_present()
         result = await self._session.put(
             f'{PitPatApiClient.__HOST_LOCATION}/api/user/{self.__user_id}/dog/{dog_id}/livetracking/stop',
             headers=self.default_headers)
 
         result.raise_for_status()
+        _LOGGER.info('Tracking stopped')
 
-    async def async_tracking_start_find(self, dog_id) -> None:
+    async def async_tracking_start_find(self, dog_id: str) -> None:
         """
         Starts active tracking in "find my dog" mode.
 
@@ -210,8 +213,9 @@ class PitPatApiClient():
             headers=self.default_headers)
 
         result.raise_for_status()
+        _LOGGER.info('Tracking started in "Find my dog" mode')
 
-    async def async_tracking_start_walk(self, dog_id) -> None:
+    async def async_tracking_start_walk(self, dog_id: str) -> None:
         """
         Starts active tracking in walk mode.
 
@@ -225,6 +229,23 @@ class PitPatApiClient():
             headers=self.default_headers)
 
         result.raise_for_status()
+        _LOGGER.info('Tracking started in "walk" mode')
+
+    async def async_update_phone_home_cadence(self, dog_id: str, value: str) -> None:
+        """
+        Update the phone home cadence of the device.
+
+        :param dog_id: The Id for the dog the monitor is registered to.
+        """
+        _LOGGER.debug('Updating phone home cadence to %s', value)
+
+        await self.async_ensure_user_id_present()
+        result = await self._session.put(
+            f'{PitPatApiClient.__HOST_LOCATION}/api/user/{self.__user_id}/dog/{dog_id}/monitor/updatePermanentCadence?cadence={value}',
+            headers=self.default_headers)
+
+        result.raise_for_status()
+        _LOGGER.info('Phone home cadence updated to "%s"', value)
 
     async def async_ensure_user_id_present(self) -> bool:
         """

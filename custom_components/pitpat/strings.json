@@ -131,6 +131,11 @@
       "live_position": {
         "name": "Live Position"
       }
+    },
+    "select": {
+      "phone_home_cadence": {
+        "name": "Phone Home Cadence"
+      }
     }
   }
 }
