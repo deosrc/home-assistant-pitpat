@@ -15,17 +15,21 @@ class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator]):
 
     def __init__(self, coordinator: PitPatDataUpdateCoordinator, dog_id: str, description: EntityDescription):
         CoordinatorEntity.__init__(self, coordinator)
-        self._dog_id = dog_id
+        self.__dog_id = dog_id
         self.entity_description = description
 
-        self._attr_unique_id = f'{self._dog_id}-{self.entity_description.key}'
+        self._attr_unique_id = f'{self.dog_id}-{self.entity_description.key}'
 
         # Required for HA 2022.7
         self.coordinator_context = object()
 
     @property
+    def dog_id(self) -> str:
+        return self.__dog_id
+
+    @property
     def data_dog(self) -> dict:
-        return self.coordinator.dogs.get(self._dog_id)
+        return self.coordinator.dogs.get(self.dog_id)
 
     @property
     def data_monitor(self) -> dict:
@@ -34,14 +38,14 @@ class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator]):
     @property
     def extra_state_attributes(self) -> Dict[str, Any] | None:
         return {
-            "dog_id": self._dog_id,
+            "dog_id": self.dog_id,
         }
 
     @property
     def device_info(self):
         """Return device information about this device."""
         return {
-            ATTR_IDENTIFIERS: {(DOMAIN, self._dog_id)},
+            ATTR_IDENTIFIERS: {(DOMAIN, self.dog_id)},
             ATTR_NAME: self.data_dog.get('Name'),
             ATTR_MANUFACTURER: MANUFACTURER,
             ATTR_MODEL_ID: self.data_dog.get('Monitor', {}).get('Model'),

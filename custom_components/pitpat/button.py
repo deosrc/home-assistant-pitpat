@@ -19,23 +19,23 @@ from .entity import PitPatDogEntity
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatButtonEntityDescription(ButtonEntityDescription):
-    press_fn: Callable[[PitPatApiClient, str], None]
+    press_fn: Callable[[PitPatApiClient, PitPatDogEntity], None]
 
 DOG_ENTITY_DESCRIPTIONS = [
     PitPatButtonEntityDescription(
         key="tracking_stop",
         translation_key="tracking_stop",
-        press_fn=lambda api, dog_id: api.async_tracking_stop(dog_id)
+        press_fn=lambda api, entity: api.async_tracking_stop(entity.data_dog)
     ),
     PitPatButtonEntityDescription(
         key="tracking_start_find",
         translation_key="tracking_start_find",
-        press_fn=lambda api, dog_id: api.async_tracking_start_find(dog_id)
+        press_fn=lambda api, entity: api.async_tracking_start_find(entity.data_dog)
     ),
     PitPatButtonEntityDescription(
         key="tracking_start_walk",
         translation_key="tracking_start_walk",
-        press_fn=lambda api, dog_id: api.async_tracking_start_walk(dog_id)
+        press_fn=lambda api, entity: api.async_tracking_start_walk(entity.data_dog)
     ),
 ]
 
@@ -59,5 +59,5 @@ class PitPatDogButtonEntity(PitPatDogEntity, ButtonEntity):
         return self.entity_description
 
     async def async_press(self):
-        await self.description.press_fn(self.coordinator.api_client, self._dog_id)
+        await self.description.press_fn(self.coordinator.api_client, self)
         await self.coordinator.async_refresh()
