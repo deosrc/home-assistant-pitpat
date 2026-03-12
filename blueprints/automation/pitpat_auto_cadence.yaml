@@ -1,0 +1,73 @@
+blueprint:
+  name: PitPat Auto-Cadence
+  description: Automatically adjusts the phone home cadence of a PitPat tracker based on schedules
+  domain: automation
+  source_url: https://github.com/deosrc/home-assistant-pitpat/blob/main/blueprints/automation/motion_light.yaml
+  author: deosrc
+  input:
+    phone_home_cadency_entities:
+      name: PitPat Entities
+      description: The PitPat phone home cadence entities to control.
+      selector:
+        entity:
+          multiple: true
+          filter:
+            integration: pitpat
+            domain: select
+    schedule_urgent:
+      name: Urgnet Schedule
+      description: The schedule indicating when the phone home cadence to Urgent.
+      selector:
+        entity:
+          filter:
+            domain: schedule
+    schedule_economy:
+      name: Economy Schedule
+      description: The schedule indicating when the phone home cadence to Economy.
+      selector:
+        entity:
+          filter:
+            domain: schedule
+
+mode: queued
+
+triggers:
+  - trigger: state
+    entity_id:
+      - !input schedule_urgent
+      - !input schedule_economy
+    to: null
+
+conditions: []
+
+actions:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: !input schedule_urgent
+            state: "on"
+        sequence:
+          - action: select.select_option
+            metadata: {}
+            target:
+              entity_id: !input phone_home_cadency_entities
+            data:
+              option: Urgent
+      - conditions:
+          - condition: state
+            entity_id: !input schedule_economy
+            state: "on"
+        sequence:
+          - action: select.select_option
+            metadata: {}
+            target:
+              entity_id: !input phone_home_cadency_entities
+            data:
+              option: Economy
+    default:
+      - action: select.select_option
+        metadata: {}
+        target:
+          entity_id: !input phone_home_cadency_entities
+        data:
+          option: Standard

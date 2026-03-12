@@ -14,6 +14,7 @@ docker run --rm \
     -v $(pwd)/.data:/config:rw \
     -v $(pwd)/debug_configuration.yaml:/config/configuration.yaml:ro \
     -v $(pwd)/custom_components:/config/custom_components:ro \
+    -v $(pwd)/blueprints:/config/blueprints \
     --user 1000:1000 \
     --name homeassistant \
     homeassistant/home-assistant:2026.1.3
