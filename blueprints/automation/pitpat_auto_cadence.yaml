@@ -2,7 +2,7 @@ blueprint:
   name: PitPat Auto-Cadence
   description: Automatically adjusts the phone home cadence of a PitPat tracker based on schedules
   domain: automation
-  source_url: https://github.com/deosrc/home-assistant-pitpat/blob/main/blueprints/automation/motion_light.yaml
+  source_url: https://github.com/deosrc/home-assistant-pitpat/blob/main/blueprints/automation/pitpat_auto_cadence.yaml
   author: deosrc
   input:
     phone_home_cadency_entities:
