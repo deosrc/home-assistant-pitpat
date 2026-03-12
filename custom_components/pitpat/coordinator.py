@@ -21,7 +21,7 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
 
     dogs: Dict[str, dict]
 
-    def __init__(self, hass: HomeAssistant, update_interval, config_entry: ConfigEntry):
+    def __init__(self, hass: HomeAssistant, update_interval: int, config_entry: ConfigEntry):
         """Initialize the coordinator and set up the Controller object."""
         self._hass = hass
         self._config_entry = config_entry
