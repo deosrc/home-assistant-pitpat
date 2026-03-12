@@ -41,7 +41,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     }
 
     # Get initial data so that correct sensors can be created
-    await coordinator.async_refresh()
+    await coordinator.async_config_entry_first_refresh()
 
     # Registers update listener to update config entry when options are updated.
     entry.async_on_unload(entry.add_update_listener(update_listener))
