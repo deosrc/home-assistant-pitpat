@@ -1,11 +1,23 @@
 from typing import Any, Dict
 
-from homeassistant.const import ATTR_HW_VERSION, ATTR_IDENTIFIERS, ATTR_MANUFACTURER, ATTR_MODEL, ATTR_MODEL_ID, ATTR_NAME, ATTR_SERIAL_NUMBER, ATTR_SW_VERSION
-from homeassistant.core import DOMAIN
+from homeassistant.const import (
+    ATTR_HW_VERSION,
+    ATTR_IDENTIFIERS,
+    ATTR_MANUFACTURER,
+    ATTR_MODEL,
+    ATTR_MODEL_ID,
+    ATTR_NAME,
+    ATTR_SERIAL_NUMBER,
+    ATTR_SW_VERSION,
+)
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DEVICE_MODEL_MAP, MANUFACTURER
+from .const import (
+    DEVICE_MODEL_MAP,
+    DOMAIN,
+    MANUFACTURER,
+)
 from .coordinator import PitPatDataUpdateCoordinator
 
 
