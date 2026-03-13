@@ -25,7 +25,7 @@ from .entity import PitPatDogEntity
 _LOGGER = logging.getLogger(__name__)
 
 def _get_phone_home_cadence(entity: PitPatDogEntity) -> str | None:
-    raw_value = entity.data_dog.get('PhoneHomeCadence')
+    raw_value = entity.data_monitor.get('PhoneHomeCadence')
     if raw_value == None:
         _LOGGER.error('No cadence available.')
         return None
