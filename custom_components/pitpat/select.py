@@ -81,7 +81,7 @@ class PitPatSelectEntity(PitPatDogEntity, SelectEntity):
     def description(self) -> PitPatSelectEntityDescription:
         return self.entity_description
 
-    @cached_property
+    @property
     def current_option(self) -> str | None:
         """Return the selected entity option to represent the entity state."""
         try:
