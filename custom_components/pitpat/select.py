@@ -24,8 +24,11 @@ from .entity import PitPatDogEntity
 
 _LOGGER = logging.getLogger(__name__)
 
+def _get_phone_home_cadence_raw(entity: PitPatDogEntity) -> str | None:
+    return entity.data_monitor.get('PhoneHomeCadence')
+
 def _get_phone_home_cadence(entity: PitPatDogEntity) -> str | None:
-    raw_value = entity.data_monitor.get('PhoneHomeCadence')
+    raw_value = _get_phone_home_cadence_raw(entity)
     if raw_value == None:
         _LOGGER.error('No cadence available.')
         return None
@@ -52,6 +55,9 @@ ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.CONFIG,
         options=list(PHONE_HOME_CADENCE_MAP.values()),
         current_option_fn=lambda entity: _get_phone_home_cadence(entity),
+        attributes_fn=lambda entity: {
+            'raw_value': _get_phone_home_cadence_raw(entity)
+        },
         update_fn=lambda api, entity, option: api.async_update_phone_home_cadence(entity.dog_id, option),
     )
 ]
