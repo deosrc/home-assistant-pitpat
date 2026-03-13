@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import logging
 from typing import Any, Callable, Dict
 
 from homeassistant.components.select import (
@@ -21,9 +22,24 @@ from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
 
 
+_LOGGER = logging.getLogger(__name__)
+
+def _get_phone_home_cadence_raw(entity: PitPatDogEntity) -> str | None:
+    return entity.data_monitor.get('PhoneHomeCadence')
+
 def _get_phone_home_cadence(entity: PitPatDogEntity) -> str | None:
-    raw_value = entity.data_dog.get('PhoneHomeCadence', 1)
-    return PHONE_HOME_CADENCE_MAP.get(raw_value, PHONE_HOME_CADENCE_MAP[1])
+    raw_value = _get_phone_home_cadence_raw(entity)
+    if raw_value == None:
+        _LOGGER.error('No cadence available.')
+        return None
+
+    option_value = PHONE_HOME_CADENCE_MAP.get(raw_value)
+    if option_value == None:
+        _LOGGER.error('No cadence mapping available for value "%s"', raw_value)
+        return None
+
+    _LOGGER.debug('Cadence value "%s" converted to option "%s"', raw_value, option_value)
+    return option_value
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatSelectEntityDescription(SelectEntityDescription):
@@ -39,6 +55,9 @@ ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.CONFIG,
         options=list(PHONE_HOME_CADENCE_MAP.values()),
         current_option_fn=lambda entity: _get_phone_home_cadence(entity),
+        attributes_fn=lambda entity: {
+            'raw_value': _get_phone_home_cadence_raw(entity)
+        },
         update_fn=lambda api, entity, option: api.async_update_phone_home_cadence(entity.dog_id, option),
     )
 ]
@@ -62,7 +81,7 @@ class PitPatSelectEntity(PitPatDogEntity, SelectEntity):
     def description(self) -> PitPatSelectEntityDescription:
         return self.entity_description
 
-    @cached_property
+    @property
     def current_option(self) -> str | None:
         """Return the selected entity option to represent the entity state."""
         try:
