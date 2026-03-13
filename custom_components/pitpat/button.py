@@ -25,17 +25,17 @@ DOG_ENTITY_DESCRIPTIONS = [
     PitPatButtonEntityDescription(
         key="tracking_stop",
         translation_key="tracking_stop",
-        press_fn=lambda api, entity: api.async_tracking_stop(entity.data_dog)
+        press_fn=lambda api, entity: api.async_tracking_stop(entity.dog_id)
     ),
     PitPatButtonEntityDescription(
         key="tracking_start_find",
         translation_key="tracking_start_find",
-        press_fn=lambda api, entity: api.async_tracking_start_find(entity.data_dog)
+        press_fn=lambda api, entity: api.async_tracking_start_find(entity.dog_id)
     ),
     PitPatButtonEntityDescription(
         key="tracking_start_walk",
         translation_key="tracking_start_walk",
-        press_fn=lambda api, entity: api.async_tracking_start_walk(entity.data_dog)
+        press_fn=lambda api, entity: api.async_tracking_start_walk(entity.dog_id)
     ),
 ]
 
