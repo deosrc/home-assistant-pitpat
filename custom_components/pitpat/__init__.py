@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.config_entries import ConfigEntry
@@ -15,11 +16,11 @@ from .const import (
 )
 
 PLATFORMS = [
-    "binary_sensor",
-    "button",
-    "device_tracker",
-    "select",
-    "sensor",
+    Platform.BINARY_SENSOR,
+    Platform.BUTTON,
+    Platform.DEVICE_TRACKER,
+    Platform.SELECT,
+    Platform.SENSOR,
 ]
 
 _LOGGER = logging.getLogger(__name__)
