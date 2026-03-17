@@ -45,7 +45,7 @@ async def validate_input(hass: HomeAssistant, username: str, password: str) -> D
     return await PitPatApiClient.async_authenticate_from_credentials(session, username, password)
 
 class PitPatConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Tdarr Controller."""
+    """Handle a config flow for the integration."""
 
     VERSION = 1
     CONNECTION_CLASS = CONN_CLASS_CLOUD_POLL

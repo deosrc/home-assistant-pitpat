@@ -28,12 +28,12 @@ def _get_update_interval(config_entry: ConfigEntry):
     return config_entry.options.get(OPTIONS_KEY_UPDATE_INTERVAL, UPDATE_INTERVAL_DEFAULT)
 
 async def async_setup(hass: HomeAssistant, config: dict):
-    """Set up the Tdarr component."""
+    """Set up the component."""
     hass.data.setdefault(DOMAIN, {})
     return True
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
-    """Set up Tdarr Server from a config entry."""
+    """Set up from a config entry."""
     coordinator = PitPatDataUpdateCoordinator(hass, _get_update_interval(entry), entry)
 
     hass.data[DOMAIN][entry.entry_id] = {
