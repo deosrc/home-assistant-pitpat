@@ -75,17 +75,15 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
 
 class PitPatSelectEntity(PitPatDogEntity, SelectEntity):
 
-    _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
+    entity_description: PitPatSelectEntityDescription
 
-    @property
-    def description(self) -> PitPatSelectEntityDescription:
-        return self.entity_description
+    _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
 
     @property
     def current_option(self) -> str | None:
         """Return the selected entity option to represent the entity state."""
         try:
-            return str(self.description.current_option_fn(self))
+            return str(self.entity_description.current_option_fn(self))
         except Exception as e:
             raise ValueError(f"Unable to get value for {self.entity_description.key} select entity for dog id {self.dog_id}") from e
 
@@ -93,15 +91,15 @@ class PitPatSelectEntity(PitPatDogEntity, SelectEntity):
     def extra_state_attributes(self) -> Dict[str, Any] | None:
         try:
             attributes = super().extra_state_attributes
-            if self.description.attributes_fn:
-                attributes = {**attributes, **self.description.attributes_fn(self)}
+            if self.entity_description.attributes_fn:
+                attributes = {**attributes, **self.entity_description.attributes_fn(self)}
             return attributes
         except Exception as e:
             raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self.dog_id}") from e
 
     async def async_select_option(self, option: str):
         try:
-            await self.description.update_fn(self.coordinator.api_client, self, option)
+            await self.entity_description.update_fn(self.coordinator.api_client, self, option)
             await self.coordinator.async_request_refresh()
         except Exception as err:
             raise HomeAssistantError(f'Failed to update phone home cadence.') from err

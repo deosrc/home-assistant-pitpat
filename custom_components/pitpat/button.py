@@ -52,12 +52,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
 
 class PitPatDogButtonEntity(PitPatDogEntity, ButtonEntity):
 
+    entity_description: PitPatButtonEntityDescription
+
     _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
 
-    @property
-    def description(self) -> PitPatButtonEntityDescription:
-        return self.entity_description
-
     async def async_press(self):
-        await self.description.press_fn(self.coordinator.api_client, self)
+        await self.entity_description.press_fn(self.coordinator.api_client, self)
         await self.coordinator.async_refresh()

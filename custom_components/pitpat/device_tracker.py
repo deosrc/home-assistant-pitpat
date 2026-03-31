@@ -67,37 +67,35 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
 
 class PitPatDogDeviceTrackerEntity(PitPatDogEntity, TrackerEntity):
 
-    _attr_has_entity_name = True
+    entity_description: PitPatTrackerEntityDescription
 
-    @property
-    def description(self) -> PitPatTrackerEntityDescription:
-        return self.entity_description
+    _attr_has_entity_name = True
 
     @property
     def available(self) -> bool:
         try:
-            return self.description.available_fn(self)
+            return self.entity_description.available_fn(self)
         except Exception as e:
             raise ValueError(f"Unable to get availability value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
 
     @property
     def latitude(self) -> float | None:
         try:
-            return self.description.latitude_fn(self)
+            return self.entity_description.latitude_fn(self)
         except Exception as e:
             raise ValueError(f"Unable to get latitude value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
 
     @property
     def longitude(self) -> float | None:
         try:
-            return self.description.longitude_fn(self)
+            return self.entity_description.longitude_fn(self)
         except Exception as e:
             raise ValueError(f"Unable to get longitude value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
 
     @property
     def location_accuracy(self) -> float | None:
         try:
-            return self.description.accuracy_fn(self)
+            return self.entity_description.accuracy_fn(self)
         except Exception as e:
             raise ValueError(f"Unable to get accuracy value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
 
@@ -105,8 +103,8 @@ class PitPatDogDeviceTrackerEntity(PitPatDogEntity, TrackerEntity):
     def extra_state_attributes(self) -> Dict[str, Any] | None:
         try:
             attributes = super().extra_state_attributes
-            if self.description.attributes_fn:
-                attributes = {**attributes, **self.description.attributes_fn(self)}
+            if self.entity_description.attributes_fn:
+                attributes = {**attributes, **self.entity_description.attributes_fn(self)}
             return attributes
         except Exception as e:
             raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self._dog_id}") from e
