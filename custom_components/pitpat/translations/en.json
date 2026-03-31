@@ -44,9 +44,6 @@
       "date_of_birth": {
         "name": "Date of Birth"
       },
-      "weight": {
-        "name": "Weight"
-      },
       "battery_level": {
         "name": "Battery Level"
       },
