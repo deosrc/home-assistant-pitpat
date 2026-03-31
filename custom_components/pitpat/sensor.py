@@ -148,7 +148,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
         suggested_unit_of_measurement=UnitOfTime.HOURS,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalPotteringMinutes', 0),
+        value_fn=lambda entity: entity.data.latest_raw_activity.get('TotalPotteringMinutes', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_running",
@@ -157,7 +157,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalRunMinutes', 0),
+        value_fn=lambda entity: entity.data.latest_raw_activity.get('TotalRunMinutes', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_walking",
@@ -166,7 +166,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalWalkMinutes', 0),
+        value_fn=lambda entity: entity.data.latest_raw_activity.get('TotalWalkMinutes', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_playing",
@@ -175,7 +175,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalPlayMinutes', 0),
+        value_fn=lambda entity: entity.data.latest_raw_activity.get('TotalPlayMinutes', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_resting",
@@ -185,7 +185,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
         suggested_unit_of_measurement=UnitOfTime.HOURS,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalRestMinutes', 0),
+        value_fn=lambda entity: entity.data.latest_raw_activity.get('TotalRestMinutes', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_total_exercising",
@@ -194,7 +194,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('Activeness', 0),
+        value_fn=lambda entity: entity.data.latest_raw_activity.get('Activeness', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_steps",
@@ -202,7 +202,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:paw",
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement="steps",
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalSteps', 0),
+        value_fn=lambda entity: entity.data.latest_raw_activity.get('TotalSteps', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_distance",
@@ -213,7 +213,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         native_unit_of_measurement=UnitOfLength.METERS,
         suggested_unit_of_measurement=UnitOfLength.KILOMETERS,
         suggested_display_precision=0,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalDistance', 0),
+        value_fn=lambda entity: entity.data.latest_raw_activity.get('TotalDistance', 0),
     ),
     PitPatSensorEntityDescription(
         key="activity_calories",
@@ -222,7 +222,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.KILO_CALORIE,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalCalories', 0),
+        value_fn=lambda entity: entity.data.latest_raw_activity.get('TotalCalories', 0),
     ),
     PitPatSensorEntityDescription(
         key="user_goal_progress",
@@ -231,7 +231,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: (entity.data_dog.get('activity_today', {}).get('Activeness', 0) / entity.data_dog.get('activity_today', {}).get('UserGoal', 0)) * 100,
+        value_fn=lambda entity: (entity.data.latest_raw_activity.get('Activeness', 0) / entity.data.latest_raw_activity.get('UserGoal', 0)) * 100,
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_mode",

@@ -19,6 +19,7 @@ from .const import (
     MANUFACTURER,
 )
 from .coordinator import PitPatDataUpdateCoordinator
+from .models import PitPatDogData
 
 TDescription = TypeVar('TDescription', bound=EntityDescription)
 
@@ -42,12 +43,17 @@ class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], Generic[TD
         return self.__dog_id
 
     @property
+    def data(self) -> PitPatDogData | None:
+        return self.coordinator.data.get(self.dog_id)
+
+    @property
     def data_dog(self) -> dict:
-        return self.coordinator.data.get(self.dog_id, {})
+        return self.data.raw_dog_data
 
     @property
     def data_monitor(self) -> dict:
-        return self.data_dog.get('monitor_details', {}).get('Value', {}).get('Monitor', {})
+        if self.data.raw_monitor_data:
+            return self.data.raw_monitor_data
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any] | None:

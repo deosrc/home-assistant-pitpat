@@ -38,7 +38,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         key='user_goal_achieved',
         translation_key='user_goal_achieved',
         icon="mdi:flag-checkered",
-        value_fn=lambda entity: bool(entity.data_dog.get('activity_today', {}).get('UserGoalAchieved', False))
+        value_fn=lambda entity: bool(entity.data.latest_raw_activity.get('UserGoalAchieved', False))
     )
 ]
 

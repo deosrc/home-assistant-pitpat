@@ -1,7 +1,7 @@
 
 from datetime import timedelta
 import logging
-from typing import Dict
+from typing import Any, Dict, Tuple
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -13,6 +13,7 @@ from homeassistant.helpers.update_coordinator import (
 
 from .api import InvalidCredentialsError, PitPatApiClient
 from .const import DOMAIN
+from .models import PitPatDogData, map_dog_data
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -70,25 +71,18 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
         await self._async_ensure_ready()
 
         dogs = await self.api_client.async_get_dogs()
-        data = { d['Id']: d for d in dogs}
 
-        for dog_id in data.keys():
-            data[dog_id] = {
-                **data[dog_id],
-                **await self._async_update_dog_data(dog_id)
-            }
+        data = {}
+        for d in dogs:
+            dog_id, dog_data = await self._async_get_dog_data(d)
+            data[dog_id] = dog_data
 
         return data
 
-    async def _async_update_dog_data(self, dog_id) -> dict:
-        monitor_details = await self.api_client.async_get_monitor(dog_id)
+    async def _async_get_dog_data(self, initial_data: Dict[str, Any]) -> Tuple[str, PitPatDogData]:
+        dog_id: str = initial_data['Id']
+
+        monitor_data = await self.api_client.async_get_monitor(dog_id)
         all_activity_days = await self.api_client.async_get_all_activity_days(dog_id)
 
-        activity_today = None
-        if (len(all_activity_days) > 0):
-            activity_today = sorted(all_activity_days, key=lambda item: item.get('Date'), reverse=True)[0]
-
-        return {
-            'monitor_details': monitor_details,
-            'activity_today': activity_today,
-        }
+        return dog_id, map_dog_data(initial_data, monitor_data, all_activity_days)
