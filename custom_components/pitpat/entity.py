@@ -43,7 +43,7 @@ class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], Generic[TD
 
     @property
     def data_dog(self) -> dict:
-        return self.coordinator.dogs.get(self.dog_id)
+        return self.coordinator.data.get(self.dog_id, {})
 
     @property
     def data_monitor(self) -> dict:

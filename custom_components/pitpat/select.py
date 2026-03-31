@@ -67,7 +67,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     coordinator: PitPatDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id][DATA_KEY_COORDINATOR]
     sensors = []
 
-    for dog_id in coordinator.dogs.keys():
+    for dog_id in coordinator.data.keys():
         for description in ENTITY_DESCRIPTIONS:
             sensors.append(PitPatSelectEntity(coordinator, dog_id, description))
 
