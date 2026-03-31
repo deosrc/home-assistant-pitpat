@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.config_entries import ConfigEntry
@@ -15,11 +16,12 @@ from .const import (
 )
 
 PLATFORMS = [
-    "binary_sensor",
-    "button",
-    "device_tracker",
-    "select",
-    "sensor",
+    Platform.BINARY_SENSOR,
+    Platform.BUTTON,
+    Platform.DEVICE_TRACKER,
+    Platform.NUMBER,
+    Platform.SELECT,
+    Platform.SENSOR,
 ]
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,12 +30,12 @@ def _get_update_interval(config_entry: ConfigEntry):
     return config_entry.options.get(OPTIONS_KEY_UPDATE_INTERVAL, UPDATE_INTERVAL_DEFAULT)
 
 async def async_setup(hass: HomeAssistant, config: dict):
-    """Set up the Tdarr component."""
+    """Set up the PitPat component."""
     hass.data.setdefault(DOMAIN, {})
     return True
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
-    """Set up Tdarr Server from a config entry."""
+    """Set up PitPat from a config entry."""
     coordinator = PitPatDataUpdateCoordinator(hass, _get_update_interval(entry), entry)
 
     hass.data[DOMAIN][entry.entry_id] = {

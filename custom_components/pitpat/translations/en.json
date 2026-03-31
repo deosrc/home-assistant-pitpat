@@ -132,6 +132,11 @@
         "name": "Live Position"
       }
     },
+    "number": {
+      "weight": {
+        "name": "Weight"
+      }
+    },
     "select": {
       "phone_home_cadence": {
         "name": "Phone Home Cadence"
