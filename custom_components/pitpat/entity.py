@@ -66,11 +66,11 @@ class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], Generic[TD
         """Return device information about this device."""
         return {
             ATTR_IDENTIFIERS: {(DOMAIN, self.dog_id)},
-            ATTR_NAME: self.data_dog.get('Name'),
+            ATTR_NAME: self.data.name,
             ATTR_MANUFACTURER: MANUFACTURER,
-            ATTR_MODEL_ID: self.data_dog.get('Monitor', {}).get('Model'),
-            ATTR_MODEL: DEVICE_MODEL_MAP.get(int(self.data_dog.get('Monitor', {}).get('Model')), ''),
-            ATTR_SW_VERSION: self.data_dog.get("Monitor", {}).get("FirmwareVersion", ""),
-            ATTR_HW_VERSION: self.data_dog.get("Monitor", {}).get("HardwareVersion", ""),
-            ATTR_SERIAL_NUMBER: self.data_monitor.get('SerialNumber')
+            ATTR_MODEL_ID: self.data.device_details.model_id,
+            ATTR_MODEL: DEVICE_MODEL_MAP.get(self.data.device_details.model_id),
+            ATTR_SW_VERSION: self.data.device_details.firmware_version,
+            ATTR_HW_VERSION: self.data.device_details.hardware_version,
+            ATTR_SERIAL_NUMBER: self.data.device_details.serial_number
         }
