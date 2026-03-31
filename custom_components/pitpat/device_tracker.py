@@ -65,9 +65,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
 
     async_add_entities(sensors, True)
 
-class PitPatDogDeviceTrackerEntity(PitPatDogEntity, TrackerEntity):
-
-    entity_description: PitPatTrackerEntityDescription
+class PitPatDogDeviceTrackerEntity(PitPatDogEntity[PitPatTrackerEntityDescription], TrackerEntity):
 
     @property
     def available(self) -> bool:

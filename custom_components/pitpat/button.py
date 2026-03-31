@@ -50,9 +50,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
 
     async_add_entities(sensors, True)
 
-class PitPatDogButtonEntity(PitPatDogEntity, ButtonEntity):
-
-    entity_description: PitPatButtonEntityDescription
+class PitPatDogButtonEntity(PitPatDogEntity[PitPatButtonEntityDescription], ButtonEntity):
 
     async def async_press(self):
         await self.entity_description.press_fn(self.coordinator.api_client, self)

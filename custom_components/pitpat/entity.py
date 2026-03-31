@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Generic, TypeVar
 
 from homeassistant.const import (
     ATTR_HW_VERSION,
@@ -20,12 +20,14 @@ from .const import (
 )
 from .coordinator import PitPatDataUpdateCoordinator
 
+TDescription = TypeVar('TDescription', bound=EntityDescription)
 
-class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator]):
+class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], Generic[TDescription]):
 
+    entity_description: TDescription
     _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
 
-    def __init__(self, coordinator: PitPatDataUpdateCoordinator, dog_id: str, description: EntityDescription):
+    def __init__(self, coordinator: PitPatDataUpdateCoordinator, dog_id: str, description: TDescription):
         CoordinatorEntity.__init__(self, coordinator)
         self.__dog_id = dog_id
         self.entity_description = description

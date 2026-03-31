@@ -73,9 +73,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
 
     async_add_entities(sensors, True)
 
-class PitPatSelectEntity(PitPatDogEntity, SelectEntity):
-
-    entity_description: PitPatSelectEntityDescription
+class PitPatSelectEntity(PitPatDogEntity[PitPatSelectEntityDescription], SelectEntity):
 
     @property
     def current_option(self) -> str | None:

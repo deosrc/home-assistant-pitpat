@@ -258,9 +258,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
 
     async_add_entities(sensors, True)
 
-class PitPatDogSensorEntity(PitPatDogEntity, SensorEntity):
-
-    entity_description: PitPatSensorEntityDescription
+class PitPatDogSensorEntity(PitPatDogEntity[PitPatSensorEntityDescription], SensorEntity):
 
     @property
     def native_value(self):
