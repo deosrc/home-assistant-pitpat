@@ -66,7 +66,7 @@ class PitPatDogBinarySensorEntity(PitPatDogEntity, BinarySensorEntity):
         try:
             return self.description.value_fn(self)
         except Exception as e:
-            raise ValueError(f"Unable to get value for {self.entity_description.key} binary sensor entity for dog id {self._dog_id}") from e
+            raise ValueError(f"Unable to get value for {self.entity_description.key} binary sensor entity for dog id {self.dog_id}") from e
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any] | None:
@@ -76,4 +76,4 @@ class PitPatDogBinarySensorEntity(PitPatDogEntity, BinarySensorEntity):
                 attributes = {**attributes, **self.description.attributes_fn(self)}
             return attributes
         except Exception as e:
-            raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self._dog_id}") from e
+            raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self.dog_id}") from e
