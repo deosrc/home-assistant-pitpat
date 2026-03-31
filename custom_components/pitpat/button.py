@@ -44,20 +44,14 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     coordinator: PitPatDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id][DATA_KEY_COORDINATOR]
     sensors = []
 
-    for dog_id in coordinator.dogs.keys():
+    for dog_id in coordinator.data.keys():
         for description in DOG_ENTITY_DESCRIPTIONS:
             sensors.append(PitPatDogButtonEntity(coordinator, dog_id, description))
 
     async_add_entities(sensors, True)
 
-class PitPatDogButtonEntity(PitPatDogEntity, ButtonEntity):
-
-    _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
-
-    @property
-    def description(self) -> PitPatButtonEntityDescription:
-        return self.entity_description
+class PitPatDogButtonEntity(PitPatDogEntity[PitPatButtonEntityDescription], ButtonEntity):
 
     async def async_press(self):
-        await self.description.press_fn(self.coordinator.api_client, self)
+        await self.entity_description.press_fn(self.coordinator.api_client, self)
         await self.coordinator.async_refresh()

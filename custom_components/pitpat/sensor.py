@@ -252,24 +252,18 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     coordinator: PitPatDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id][DATA_KEY_COORDINATOR]
     sensors = []
 
-    for dog_id in coordinator.dogs.keys():
+    for dog_id in coordinator.data.keys():
         for description in DOG_ENTITY_DESCRIPTIONS:
             sensors.append(PitPatDogSensorEntity(coordinator, dog_id, description))
 
     async_add_entities(sensors, True)
 
-class PitPatDogSensorEntity(PitPatDogEntity, SensorEntity):
-
-    _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
-
-    @property
-    def description(self) -> PitPatSensorEntityDescription:
-        return self.entity_description
+class PitPatDogSensorEntity(PitPatDogEntity[PitPatSensorEntityDescription], SensorEntity):
 
     @property
     def native_value(self):
         try:
-            return self.description.value_fn(self)
+            return self.entity_description.value_fn(self)
         except Exception as e:
             raise ValueError(f"Unable to get value for {self.entity_description.key} sensor entity for dog id {self.dog_id}") from e
 
@@ -277,8 +271,8 @@ class PitPatDogSensorEntity(PitPatDogEntity, SensorEntity):
     def extra_state_attributes(self) -> Dict[str, Any] | None:
         try:
             attributes = super().extra_state_attributes
-            if self.description.attributes_fn:
-                attributes = {**attributes, **self.description.attributes_fn(self)}
+            if self.entity_description.attributes_fn:
+                attributes = {**attributes, **self.entity_description.attributes_fn(self)}
             return attributes
         except Exception as e:
             raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self.dog_id}") from e
