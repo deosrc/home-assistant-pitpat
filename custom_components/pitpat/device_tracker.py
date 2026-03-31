@@ -72,28 +72,28 @@ class PitPatDogDeviceTrackerEntity(PitPatDogEntity[PitPatTrackerEntityDescriptio
         try:
             return self.entity_description.available_fn(self)
         except Exception as e:
-            raise ValueError(f"Unable to get availability value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
+            raise ValueError(f"Unable to get availability value for {self.entity_description.key} device tracker entity for dog id {self.dog_id}") from e
 
     @property
     def latitude(self) -> float | None:
         try:
             return self.entity_description.latitude_fn(self)
         except Exception as e:
-            raise ValueError(f"Unable to get latitude value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
+            raise ValueError(f"Unable to get latitude value for {self.entity_description.key} device tracker entity for dog id {self.dog_id}") from e
 
     @property
     def longitude(self) -> float | None:
         try:
             return self.entity_description.longitude_fn(self)
         except Exception as e:
-            raise ValueError(f"Unable to get longitude value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
+            raise ValueError(f"Unable to get longitude value for {self.entity_description.key} device tracker entity for dog id {self.dog_id}") from e
 
     @property
     def location_accuracy(self) -> float | None:
         try:
             return self.entity_description.accuracy_fn(self)
         except Exception as e:
-            raise ValueError(f"Unable to get accuracy value for {self.entity_description.key} device tracker entity for dog id {self._dog_id}") from e
+            raise ValueError(f"Unable to get accuracy value for {self.entity_description.key} device tracker entity for dog id {self.dog_id}") from e
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any] | None:
@@ -103,4 +103,4 @@ class PitPatDogDeviceTrackerEntity(PitPatDogEntity[PitPatTrackerEntityDescriptio
                 attributes = {**attributes, **self.entity_description.attributes_fn(self)}
             return attributes
         except Exception as e:
-            raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self._dog_id}") from e
+            raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self.dog_id}") from e
