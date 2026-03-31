@@ -57,8 +57,6 @@ class PitPatDogBinarySensorEntity(PitPatDogEntity, BinarySensorEntity):
 
     entity_description: PitPatBinarySensorEntityDescription
 
-    _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
-
     @property
     def is_on(self):
         try:

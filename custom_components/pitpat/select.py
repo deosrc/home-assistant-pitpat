@@ -77,8 +77,6 @@ class PitPatSelectEntity(PitPatDogEntity, SelectEntity):
 
     entity_description: PitPatSelectEntityDescription
 
-    _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
-
     @property
     def current_option(self) -> str | None:
         """Return the selected entity option to represent the entity state."""

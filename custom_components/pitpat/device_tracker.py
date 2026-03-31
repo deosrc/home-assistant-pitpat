@@ -69,8 +69,6 @@ class PitPatDogDeviceTrackerEntity(PitPatDogEntity, TrackerEntity):
 
     entity_description: PitPatTrackerEntityDescription
 
-    _attr_has_entity_name = True
-
     @property
     def available(self) -> bool:
         try:

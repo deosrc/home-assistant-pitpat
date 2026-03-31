@@ -262,8 +262,6 @@ class PitPatDogSensorEntity(PitPatDogEntity, SensorEntity):
 
     entity_description: PitPatSensorEntityDescription
 
-    _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
-
     @property
     def native_value(self):
         try:
