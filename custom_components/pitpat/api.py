@@ -236,6 +236,7 @@ class PitPatApiClient():
         Update the phone home cadence of the device.
 
         :param dog_id: The Id for the dog the monitor is registered to.
+        :param value: The phone home cadence (Economy, Standard or Urgent)
         """
         _LOGGER.debug('Updating phone home cadence to %s', value)
 
@@ -246,6 +247,21 @@ class PitPatApiClient():
 
         result.raise_for_status()
         _LOGGER.info('Phone home cadence updated to "%s"', value)
+
+    async def async_set_weight(self, dog_id: str, value: float) -> None:
+        """
+        Update the weight for a dog.
+
+        :param dog_id: The Id for the dog the monitor is registered to.
+        :param value: The weight of the dog in kg.
+        """
+        _LOGGER.debug('Updating weight for %s to %d kg', dog_id, value)
+
+        await self.async_ensure_user_id_present()
+        raise NotImplementedError()
+
+        result.raise_for_status()
+        _LOGGER.info('Updated weight for %s to %d kg', dog_id, value)
 
     async def async_ensure_user_id_present(self) -> bool:
         """

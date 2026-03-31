@@ -6,7 +6,9 @@ from homeassistant.components.number import NumberDeviceClass, NumberEntity, Num
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfMass
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 
+from .api import PitPatApiClient
 from .const import DATA_KEY_COORDINATOR, DOMAIN
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
@@ -18,6 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 class PitPatNumberEntityDescription(NumberEntityDescription):
     value_fn: Callable[[PitPatDogEntity], int | float | None]
     attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
+    set_fn: Callable[[PitPatApiClient, PitPatDogEntity, float], None]
 
 
 DOG_ENTITY_DESCRIPTIONS = [
@@ -31,6 +34,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         native_min_value=1.0,
         native_max_value=150.0,
         value_fn=lambda entity: entity.data_dog.get('Weight'),
+        set_fn=lambda api, entity, value: api.async_set_weight(entity.dog_id, value)
     )
 ]
 
@@ -67,3 +71,10 @@ class PitPatDogNumberEntity(PitPatDogEntity, NumberEntity):
             return attributes
         except Exception as e:
             raise ValueError(f"Unable to get attributes for {self.entity_description.key} number entity for dog id {self.dog_id}") from e
+
+    async def async_set_native_value(self, value: float) -> None:
+        try:
+            await self.entity_description.set_fn(self.coordinator.api_client, self, value)
+            await self.coordinator.async_request_refresh()
+        except Exception as e:
+            raise HomeAssistantError(f'Failed to update {self.entity_description.key} number entity for dog id {self.dog_id}') from e
