@@ -33,7 +33,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         key="charging_status",
         translation_key="charging_status",
         device_class=BinarySensorDeviceClass.BATTERY_CHARGING,
-        value_fn=lambda entity: bool(entity.data_monitor.get('BatteryInfo', {}).get('Value', {}).get('IsCharging', False)),
+        value_fn=lambda entity: entity.data.device.is_charging,
     ),
     PitPatBinarySensorEntityDescription(
         key='user_goal_achieved',

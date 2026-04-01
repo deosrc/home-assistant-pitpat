@@ -43,6 +43,9 @@ class PitPatDevice():
     firmware_version: str | None
     hardware_version: str | None
     serial_number: str | None
+
+    is_charging: bool | None
+    battery_level: float | None
     tracking: PitPatTracking
 
 @dataclass(frozen=True, kw_only=True)
@@ -97,6 +100,9 @@ def map_dog_data(dog_data: Dict[str, Any], monitor_data: Dict[str, Any], activit
         firmware_version=dog_data.get("Monitor", {}).get("FirmwareVersion", ""),
         hardware_version=dog_data.get("Monitor", {}).get("HardwareVersion", ""),
         serial_number=raw_monitor_data.get('SerialNumber'),
+
+        is_charging=bool(raw_monitor_data.get('BatteryInfo', {}).get('Value', {}).get('IsCharging', False)),
+        battery_level=float(raw_monitor_data.get('BatteryInfo', {}).get('Value', {}).get('BatteryLevelFraction')),
         tracking=tracking,
     )
 

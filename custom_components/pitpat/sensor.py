@@ -75,7 +75,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: entity.data_monitor.get('BatteryInfo', {}).get('Value', {}).get('BatteryLevelFraction') * 100,
+        value_fn=lambda entity: entity.data.device.battery_level * 100,
     ),
     PitPatSensorEntityDescription(
         key="network",
