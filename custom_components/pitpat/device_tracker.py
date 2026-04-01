@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, Callable, Dict
 
-import dateutil
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.components.device_tracker.config_entry import (
@@ -15,20 +14,12 @@ from .const import (
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
+from .models import TrackingStatus
 
-
-def _get_monitor_position(entity: PitPatDogEntity) -> dict:
-    return entity.data_monitor.get('LastKnownPosition', {}).get('Value', {})
-
-def _is_tracking_live(entity: PitPatDogEntity) -> bool:
-    return entity.data_monitor.get('GpsSynchronisationState', 0) == 3
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatTrackerEntityDescription(TrackerEntityDescription):
-    available_fn: Callable[[PitPatDogEntity], bool | None] = lambda data: True
-    latitude_fn: Callable[[PitPatDogEntity], float | None]
-    longitude_fn: Callable[[PitPatDogEntity], float | None]
-    accuracy_fn: Callable[[PitPatDogEntity], float]
+    available_fn: Callable[[PitPatDogEntity], bool | None] = lambda entity: True
     attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
 
 ENTITY_DESCRIPTIONS = [
@@ -36,21 +27,15 @@ ENTITY_DESCRIPTIONS = [
         key='last_known_position',
         translation_key='last_known_position',
         icon="mdi:dog",
-        latitude_fn=lambda entity: float(_get_monitor_position(entity).get('Latitude')),
-        longitude_fn=lambda entity: float(_get_monitor_position(entity).get('Longitude')),
-        accuracy_fn=lambda entity: float(_get_monitor_position(entity).get('Accuracy', {}).get('Metres')),
         attributes_fn=lambda entity: {
-            "last_updated": dateutil.parser.parse(_get_monitor_position(entity).get('DataTime'))
+            "last_updated": entity.data.tracking.last_position.updated
         }
     ),
     PitPatTrackerEntityDescription(
         key='live_position',
         translation_key='live_position',
         icon="mdi:dog",
-        available_fn=lambda data: _is_tracking_live(data),
-        latitude_fn=lambda data: float(_get_monitor_position(data).get('Latitude')),
-        longitude_fn=lambda data: float(_get_monitor_position(data).get('Longitude')),
-        accuracy_fn=lambda data: float(_get_monitor_position(data).get('Accuracy', {}).get('Metres')),
+        available_fn=lambda entity: entity.data.tracking.tracking_status == TrackingStatus.TRACKING,
     )
 ]
 
@@ -70,6 +55,9 @@ class PitPatDogDeviceTrackerEntity(PitPatDogEntity[PitPatTrackerEntityDescriptio
     @property
     def available(self) -> bool:
         try:
+            if not self.data.tracking.last_position:
+                return False
+
             return self.entity_description.available_fn(self)
         except Exception as e:
             raise ValueError(f"Unable to get availability value for {self.entity_description.key} device tracker entity for dog id {self.dog_id}") from e
@@ -77,21 +65,21 @@ class PitPatDogDeviceTrackerEntity(PitPatDogEntity[PitPatTrackerEntityDescriptio
     @property
     def latitude(self) -> float | None:
         try:
-            return self.entity_description.latitude_fn(self)
+            return self.data.tracking.last_position.latitude
         except Exception as e:
             raise ValueError(f"Unable to get latitude value for {self.entity_description.key} device tracker entity for dog id {self.dog_id}") from e
 
     @property
     def longitude(self) -> float | None:
         try:
-            return self.entity_description.longitude_fn(self)
+            return self.data.tracking.last_position.longitude
         except Exception as e:
             raise ValueError(f"Unable to get longitude value for {self.entity_description.key} device tracker entity for dog id {self.dog_id}") from e
 
     @property
     def location_accuracy(self) -> float | None:
         try:
-            return self.entity_description.accuracy_fn(self)
+            return self.data.tracking.last_position.accuracy
         except Exception as e:
             raise ValueError(f"Unable to get accuracy value for {self.entity_description.key} device tracker entity for dog id {self.dog_id}") from e
 
