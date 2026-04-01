@@ -68,9 +68,9 @@ class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], Generic[TD
             ATTR_IDENTIFIERS: {(DOMAIN, self.dog_id)},
             ATTR_NAME: self.data.name,
             ATTR_MANUFACTURER: MANUFACTURER,
-            ATTR_MODEL_ID: self.data.device_details.model_id,
-            ATTR_MODEL: DEVICE_MODEL_MAP.get(self.data.device_details.model_id),
-            ATTR_SW_VERSION: self.data.device_details.firmware_version,
-            ATTR_HW_VERSION: self.data.device_details.hardware_version,
-            ATTR_SERIAL_NUMBER: self.data.device_details.serial_number
+            ATTR_MODEL_ID: self.data.device.model_id,
+            ATTR_MODEL: DEVICE_MODEL_MAP.get(self.data.device.model_id),
+            ATTR_SW_VERSION: self.data.device.firmware_version,
+            ATTR_HW_VERSION: self.data.device.hardware_version,
+            ATTR_SERIAL_NUMBER: self.data.device.serial_number
         }

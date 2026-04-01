@@ -215,13 +215,13 @@ DOG_ENTITY_DESCRIPTIONS = [
         key="live_tracking_mode",
         translation_key="live_tracking_mode",
         icon="mdi:map-marker-radius",
-        value_fn=lambda entity: entity.data.tracking.tracking_mode.name.lower(),
+        value_fn=lambda entity: entity.data.device.tracking.mode.name.lower(),
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_status",
         translation_key="live_tracking_status",
         icon="mdi:satellite-variant",
-        value_fn=lambda entity: entity.data.tracking.tracking_status.name.lower(),
+        value_fn=lambda entity: entity.data.device.tracking.status.name.lower(),
     ),
 ]
 

@@ -28,14 +28,14 @@ ENTITY_DESCRIPTIONS = [
         translation_key='last_known_position',
         icon="mdi:dog",
         attributes_fn=lambda entity: {
-            "last_updated": entity.data.tracking.last_position.updated
+            "last_updated": entity.data.device.tracking.last_position.updated
         }
     ),
     PitPatTrackerEntityDescription(
         key='live_position',
         translation_key='live_position',
         icon="mdi:dog",
-        available_fn=lambda entity: entity.data.tracking.tracking_status == TrackingStatus.TRACKING,
+        available_fn=lambda entity: entity.data.device.tracking.status == TrackingStatus.TRACKING,
     )
 ]
 
@@ -55,7 +55,7 @@ class PitPatDogDeviceTrackerEntity(PitPatDogEntity[PitPatTrackerEntityDescriptio
     @property
     def available(self) -> bool:
         try:
-            if not self.data.tracking.last_position:
+            if not self.data.device.tracking.last_position:
                 return False
 
             return self.entity_description.available_fn(self)
@@ -65,21 +65,21 @@ class PitPatDogDeviceTrackerEntity(PitPatDogEntity[PitPatTrackerEntityDescriptio
     @property
     def latitude(self) -> float | None:
         try:
-            return self.data.tracking.last_position.latitude
+            return self.data.device.tracking.last_position.latitude
         except Exception as e:
             raise ValueError(f"Unable to get latitude value for {self.entity_description.key} device tracker entity for dog id {self.dog_id}") from e
 
     @property
     def longitude(self) -> float | None:
         try:
-            return self.data.tracking.last_position.longitude
+            return self.data.device.tracking.last_position.longitude
         except Exception as e:
             raise ValueError(f"Unable to get longitude value for {self.entity_description.key} device tracker entity for dog id {self.dog_id}") from e
 
     @property
     def location_accuracy(self) -> float | None:
         try:
-            return self.data.tracking.last_position.accuracy
+            return self.data.device.tracking.last_position.accuracy
         except Exception as e:
             raise ValueError(f"Unable to get accuracy value for {self.entity_description.key} device tracker entity for dog id {self.dog_id}") from e
 

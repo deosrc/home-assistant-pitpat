@@ -25,13 +25,6 @@ class TrackingMode(Enum):
     WALK = 2
 
 @dataclass(frozen=True, kw_only=True)
-class PitPatDeviceDetails():
-    model_id: int | None
-    firmware_version: str | None
-    hardware_version: str | None
-    serial_number: str | None
-
-@dataclass(frozen=True, kw_only=True)
 class Location():
     updated: datetime
     latitude: float
@@ -40,9 +33,17 @@ class Location():
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatTracking():
-    tracking_status: TrackingStatus | None
-    tracking_mode: TrackingMode | None
+    status: TrackingStatus | None
+    mode: TrackingMode | None
     last_position: Location | None
+
+@dataclass(frozen=True, kw_only=True)
+class PitPatDevice():
+    model_id: int | None
+    firmware_version: str | None
+    hardware_version: str | None
+    serial_number: str | None
+    tracking: PitPatTracking
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatDogData():
@@ -56,8 +57,7 @@ class PitPatDogData():
     gender: Gender
     date_of_birth: date | None
     weight: float | None
-    device_details: PitPatDeviceDetails
-    tracking: PitPatTracking
+    device: PitPatDevice
 
 
 def _get_location(data: Dict[str, Any]) -> Location:
@@ -85,18 +85,19 @@ def map_dog_data(dog_data: Dict[str, Any], monitor_data: Dict[str, Any], activit
     date_of_birth = dog_data.get('BirthDate')
     weight = dog_data.get('Weight')
 
-    device_details = PitPatDeviceDetails(
+    location = _get_location(raw_monitor_data.get('LastKnownPosition', {}).get('Value', {}))
+    tracking = PitPatTracking(
+        status=TrackingStatus(raw_monitor_data.get('GpsSynchronisationState', 0)),
+        mode=TrackingMode(raw_monitor_data.get('LiveTrackingReason', 0)),
+        last_position=location,
+    )
+
+    device = PitPatDevice(
         model_id=int(dog_data.get('Monitor', {}).get('Model', 0)),
         firmware_version=dog_data.get("Monitor", {}).get("FirmwareVersion", ""),
         hardware_version=dog_data.get("Monitor", {}).get("HardwareVersion", ""),
         serial_number=raw_monitor_data.get('SerialNumber'),
-    )
-
-    location = _get_location(raw_monitor_data.get('LastKnownPosition', {}).get('Value', {}))
-    tracking = PitPatTracking(
-        tracking_status=TrackingStatus(raw_monitor_data.get('GpsSynchronisationState', 0)),
-        tracking_mode=TrackingMode(raw_monitor_data.get('LiveTrackingReason', 0)),
-        last_position=location,
+        tracking=tracking,
     )
 
     return PitPatDogData(
@@ -110,6 +111,6 @@ def map_dog_data(dog_data: Dict[str, Any], monitor_data: Dict[str, Any], activit
         gender=Gender.FEMALE if dog_data.get('IsFemale') else Gender.MALE,
         date_of_birth=dateutil.parser.parse(date_of_birth).date() if date_of_birth else None,
         weight=float(weight) if weight else None,
-        device_details=device_details,
-        tracking=tracking,
+
+        device=device,
     )

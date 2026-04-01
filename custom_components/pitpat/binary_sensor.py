@@ -27,7 +27,7 @@ DOG_ENTITY_DESCRIPTIONS = [
     PitPatBinarySensorEntityDescription(
         key="live_tracking_active",
         translation_key="live_tracking_active",
-        value_fn=lambda entity: entity.data.tracking.tracking_mode != TrackingMode.NONE,
+        value_fn=lambda entity: entity.data.device.tracking.mode != TrackingMode.NONE,
     ),
     PitPatBinarySensorEntityDescription(
         key="charging_status",
