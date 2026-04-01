@@ -81,15 +81,6 @@ DOG_ENTITY_DESCRIPTIONS = [
         value_fn=lambda entity: dateutil.parser.parse(entity.data_dog.get('BirthDate')).date(),
     ),
     PitPatSensorEntityDescription(
-        key="weight",
-        translation_key="weight",
-        device_class=SensorDeviceClass.WEIGHT,
-        state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=UnitOfMass.KILOGRAMS, # TODO: Make sure this is correct based on user settings
-        suggested_display_precision=1,
-        value_fn=lambda entity: entity.data_dog.get('Weight'),
-    ),
-    PitPatSensorEntityDescription(
         key="battery_level",
         translation_key="battery_level",
         device_class=SensorDeviceClass.BATTERY,
