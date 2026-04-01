@@ -82,7 +82,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         translation_key="network",
         icon='mdi:radio-tower',
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('NetworkOperator', {}).get('Value'),
+        value_fn=lambda entity: entity.data.device.network_operator,
     ),
     PitPatSensorEntityDescription(
         key="signal_strength",
@@ -92,7 +92,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality') * 20,
+        value_fn=lambda entity: entity.data.device.signal_strength * 100,
     ),
     PitPatSensorEntityDescription(
         key="last_message_sent",

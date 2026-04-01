@@ -46,6 +46,8 @@ class PitPatDevice():
 
     is_charging: bool | None
     battery_level: float | None
+    network_operator: str | None
+    signal_strength: float | None
     tracking: PitPatTracking
 
 @dataclass(frozen=True, kw_only=True)
@@ -103,6 +105,8 @@ def map_dog_data(dog_data: Dict[str, Any], monitor_data: Dict[str, Any], activit
 
         is_charging=bool(raw_monitor_data.get('BatteryInfo', {}).get('Value', {}).get('IsCharging', False)),
         battery_level=float(raw_monitor_data.get('BatteryInfo', {}).get('Value', {}).get('BatteryLevelFraction')),
+        network_operator=raw_monitor_data.get('Network', {}).get('Value', {}).get('NetworkOperator', {}).get('Value'),
+        signal_strength=float(raw_monitor_data.get('Network', {}).get('Value', {}).get('Quality')) / 5,
         tracking=tracking,
     )
 
