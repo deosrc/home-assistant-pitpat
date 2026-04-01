@@ -59,26 +59,26 @@ DOG_ENTITY_DESCRIPTIONS = [
         key="breed",
         translation_key="breed",
         icon="mdi:dog-side",
-        value_fn=lambda entity: entity.data_dog.get('Breed', {}).get('Name'),
+        value_fn=lambda entity: entity.data.breed_name,
     ),
     PitPatSensorEntityDescription(
         key="family",
         translation_key="family",
         icon="mdi:dog-side",
-        value_fn=lambda entity: entity.data_dog.get('Breed', {}).get('Family'),
+        value_fn=lambda entity: entity.data.breed_family,
     ),
     PitPatSensorEntityDescription(
         key="gender",
         translation_key="gender",
         icon="mdi:gender-male-female",
-        value_fn=lambda entity: 'Female' if entity.data_dog.get('IsFemale', {}) else 'Male',
+        value_fn=lambda entity: entity.data.gender.name,
     ),
     PitPatSensorEntityDescription(
         key="date_of_birth",
         translation_key="date_of_birth",
         icon="mdi:calendar",
         device_class=SensorDeviceClass.DATE,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_dog.get('BirthDate')).date(),
+        value_fn=lambda entity: entity.data.date_of_birth,
     ),
     PitPatSensorEntityDescription(
         key="weight",
@@ -87,7 +87,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfMass.KILOGRAMS, # TODO: Make sure this is correct based on user settings
         suggested_display_precision=1,
-        value_fn=lambda entity: entity.data_dog.get('Weight'),
+        value_fn=lambda entity: entity.data.weight,
     ),
     PitPatSensorEntityDescription(
         key="battery_level",

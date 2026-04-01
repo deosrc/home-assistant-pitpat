@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 import logging
 from typing import Any, Dict, List
@@ -14,6 +14,10 @@ class TrackingStatus(Enum):
     WAITING_FOR_CONNECTION = 1
     LISTENING_FOR_SATELLITES = 2
     TRACKING = 3
+
+class Gender(Enum):
+    Male = 0
+    Female = 1
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatDeviceDetails():
@@ -41,6 +45,11 @@ class PitPatDogData():
     latest_raw_activity: Dict[str, Any] | None
 
     name: str | None
+    breed_name: str | None
+    breed_family: str | None
+    gender: Gender
+    date_of_birth: date | None
+    weight: float | None
     device_details: PitPatDeviceDetails
     tracking: PitPatTracking
 
@@ -67,6 +76,9 @@ def map_dog_data(dog_data: Dict[str, Any], monitor_data: Dict[str, Any], activit
     raw_monitor_data = monitor_data.get('Value', {}).get('Monitor', {})
     latest_activity = sorted(activity_data, key=lambda item: item.get('Date'), reverse=True)[0] if len(activity_data) != 0 else None
 
+    date_of_birth = dog_data.get('BirthDate')
+    weight = dog_data.get('Weight')
+
     device_details = PitPatDeviceDetails(
         model_id=int(dog_data.get('Monitor', {}).get('Model', 0)),
         firmware_version=dog_data.get("Monitor", {}).get("FirmwareVersion", ""),
@@ -86,6 +98,11 @@ def map_dog_data(dog_data: Dict[str, Any], monitor_data: Dict[str, Any], activit
         latest_raw_activity=latest_activity,
 
         name=dog_data.get('Name'),
+        breed_name=dog_data.get('Breed', {}).get('Name'),
+        breed_family=dog_data.get('Breed', {}).get('Family'),
+        gender=Gender.Female if dog_data.get('IsFemale') else Gender.Male,
+        date_of_birth=dateutil.parser.parse(date_of_birth).date() if date_of_birth else None,
+        weight=float(weight) if weight else None,
         device_details=device_details,
         tracking=tracking,
     )
