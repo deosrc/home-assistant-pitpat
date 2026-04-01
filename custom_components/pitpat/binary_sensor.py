@@ -15,6 +15,7 @@ from .const import (
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
+from .models import TrackingMode
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -26,7 +27,7 @@ DOG_ENTITY_DESCRIPTIONS = [
     PitPatBinarySensorEntityDescription(
         key="live_tracking_active",
         translation_key="live_tracking_active",
-        value_fn=lambda entity: entity.data_monitor.get('LiveTrackingReason', 0) != 0,
+        value_fn=lambda entity: entity.data.tracking.tracking_mode != TrackingMode.NONE,
     ),
     PitPatBinarySensorEntityDescription(
         key="charging_status",
