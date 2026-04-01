@@ -39,16 +39,20 @@ class PitPatTracking():
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatDevice():
-    model_id: int | None
-    firmware_version: str | None
-    hardware_version: str | None
-    serial_number: str | None
+    model_id: int
+    firmware_version: str
+    hardware_version: str
+    serial_number: str
 
     is_charging: bool | None
     battery_level: float | None
     network_operator: str | None
     signal_strength: float | None
     tracking: PitPatTracking
+
+    last_message_sent: datetime
+    last_message_received: datetime
+    next_message_expected: datetime
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatDogData():
@@ -90,6 +94,10 @@ def map_dog_data(dog_data: Dict[str, Any], monitor_data: Dict[str, Any], activit
     date_of_birth = dog_data.get('BirthDate')
     weight = dog_data.get('Weight')
 
+    last_message_sent = raw_monitor_data.get('ContactTimings', {}).get('Value', {}).get('LastMessageSentAt')
+    last_message_received = raw_monitor_data.get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')
+    next_message_expected = raw_monitor_data.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')
+
     location = _get_location(raw_monitor_data.get('LastKnownPosition', {}).get('Value', {}))
     tracking = PitPatTracking(
         status=TrackingStatus(raw_monitor_data.get('GpsSynchronisationState', 0)),
@@ -108,6 +116,10 @@ def map_dog_data(dog_data: Dict[str, Any], monitor_data: Dict[str, Any], activit
         network_operator=raw_monitor_data.get('Network', {}).get('Value', {}).get('NetworkOperator', {}).get('Value'),
         signal_strength=float(raw_monitor_data.get('Network', {}).get('Value', {}).get('Quality')) / 5,
         tracking=tracking,
+
+        last_message_sent=dateutil.parser.parse(last_message_sent),
+        last_message_received=dateutil.parser.parse(last_message_received),
+        next_message_expected=dateutil.parser.parse(next_message_expected),
     )
 
     return PitPatDogData(

@@ -100,7 +100,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-arrow-right-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageSentAt')),
+        value_fn=lambda entity: entity.data.device.last_message_sent,
     ),
     PitPatSensorEntityDescription(
         key="last_message_received",
@@ -108,7 +108,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-arrow-left-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')),
+        value_fn=lambda entity: entity.data.device.last_message_received,
     ),
     PitPatSensorEntityDescription(
         key="next_message_expected",
@@ -116,7 +116,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-fast-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')),
+        value_fn=lambda entity: entity.data.device.next_message_expected,
     ),
     PitPatSensorEntityDescription(
         key="activity_pottering",
