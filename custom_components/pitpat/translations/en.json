@@ -39,7 +39,11 @@
         "name": "Breed Family"
       },
       "gender": {
-        "name": "Gender"
+        "name": "Gender",
+        "state": {
+          "male": "Male",
+          "female": "Female"
+        }
       },
       "date_of_birth": {
         "name": "Date of Birth"
@@ -93,10 +97,21 @@
         "name": "Calories Burned Today"
       },
       "live_tracking_mode": {
-        "name": "Live Tracking Mode"
+        "name": "Live Tracking Mode",
+        "state": {
+          "none": "None",
+          "find_my_dog": "Find my dog",
+          "Walk": "Walk"
+        }
       },
       "live_tracking_status": {
-        "name": "Live Tracking Status"
+        "name": "Live Tracking Status",
+        "state": {
+          "not_tracking": "Not tracking",
+          "waiting_for_connection": "Waiting for connection",
+          "listening_for_satellites": "Listening for satellites",
+          "tracking": "Tracking"
+        }
       },
       "user_goal_progress": {
         "name": "Goal Progress"

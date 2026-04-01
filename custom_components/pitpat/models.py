@@ -9,15 +9,20 @@ import dateutil
 
 _LOGGER = logging.getLogger(__name__)
 
+class Gender(Enum):
+    MALE = 0
+    FEMALE = 1
+
 class TrackingStatus(Enum):
     NOT_TRACKING = 0
     WAITING_FOR_CONNECTION = 1
     LISTENING_FOR_SATELLITES = 2
     TRACKING = 3
 
-class Gender(Enum):
-    Male = 0
-    Female = 1
+class TrackingMode(Enum):
+    NONE = 0
+    FIND_MY_DOG = 1
+    WALK = 2
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatDeviceDetails():
@@ -36,6 +41,7 @@ class Location():
 @dataclass(frozen=True, kw_only=True)
 class PitPatTracking():
     tracking_status: TrackingStatus | None
+    tracking_mode: TrackingMode | None
     last_position: Location | None
 
 @dataclass(frozen=True, kw_only=True)
@@ -89,6 +95,7 @@ def map_dog_data(dog_data: Dict[str, Any], monitor_data: Dict[str, Any], activit
     location = _get_location(raw_monitor_data.get('LastKnownPosition', {}).get('Value', {}))
     tracking = PitPatTracking(
         tracking_status=TrackingStatus(raw_monitor_data.get('GpsSynchronisationState', 0)),
+        tracking_mode=TrackingMode(raw_monitor_data.get('LiveTrackingReason', 0)),
         last_position=location,
     )
 
@@ -100,7 +107,7 @@ def map_dog_data(dog_data: Dict[str, Any], monitor_data: Dict[str, Any], activit
         name=dog_data.get('Name'),
         breed_name=dog_data.get('Breed', {}).get('Name'),
         breed_family=dog_data.get('Breed', {}).get('Family'),
-        gender=Gender.Female if dog_data.get('IsFemale') else Gender.Male,
+        gender=Gender.FEMALE if dog_data.get('IsFemale') else Gender.MALE,
         date_of_birth=dateutil.parser.parse(date_of_birth).date() if date_of_birth else None,
         weight=float(weight) if weight else None,
         device_details=device_details,

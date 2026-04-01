@@ -27,28 +27,6 @@ from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
 
 
-def _get_tracking_mode(entity: PitPatDogEntity):
-    reason_id = entity.data_monitor.get('LiveTrackingReason', 0)
-    if reason_id == 1:
-        return 'Find my dog'
-    elif reason_id == 2:
-        return 'Walk'
-    else:
-        return 'None'
-
-def _get_tracking_status(entity: PitPatDogEntity):
-    reason_id = entity.data_monitor.get('GpsSynchronisationState', 0)
-    if reason_id == 0:
-        return 'Not tracking'
-    elif reason_id == 1:
-        return 'Waiting for connection'
-    elif reason_id == 2:
-        return 'Listening for satellites'
-    elif reason_id == 3:
-        return 'Tracking'
-    else:
-        return 'unknown'
-
 @dataclass(frozen=True, kw_only=True)
 class PitPatSensorEntityDescription(SensorEntityDescription):
     value_fn: Callable[[PitPatDogEntity], str | int | float | None]
@@ -71,7 +49,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         key="gender",
         translation_key="gender",
         icon="mdi:gender-male-female",
-        value_fn=lambda entity: entity.data.gender.name,
+        value_fn=lambda entity: entity.data.gender.name.lower(),
     ),
     PitPatSensorEntityDescription(
         key="date_of_birth",
@@ -237,13 +215,13 @@ DOG_ENTITY_DESCRIPTIONS = [
         key="live_tracking_mode",
         translation_key="live_tracking_mode",
         icon="mdi:map-marker-radius",
-        value_fn=lambda entity: _get_tracking_mode(entity),
+        value_fn=lambda entity: entity.data.tracking.tracking_mode.name.lower(),
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_status",
         translation_key="live_tracking_status",
         icon="mdi:satellite-variant",
-        value_fn=lambda entity: _get_tracking_status(entity),
+        value_fn=lambda entity: entity.data.tracking.tracking_status.name.lower(),
     ),
 ]
 
