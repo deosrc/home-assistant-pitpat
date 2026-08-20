@@ -27,6 +27,14 @@ from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
 
 
+def _battery_level(entity: PitPatDogEntity):
+    # Activity monitors do not report BatteryInfo, and the nested keys can be
+    # present but null, so guard before scaling to a percentage.
+    battery_info = entity.data_monitor.get('BatteryInfo') or {}
+    value = battery_info.get('Value') or {}
+    fraction = value.get('BatteryLevelFraction')
+    return None if fraction is None else fraction * 100
+
 def _get_tracking_mode(entity: PitPatDogEntity):
     reason_id = entity.data_monitor.get('LiveTrackingReason', 0)
     if reason_id == 1:
@@ -97,7 +105,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: entity.data_monitor.get('BatteryInfo', {}).get('Value', {}).get('BatteryLevelFraction') * 100,
+        value_fn=lambda entity: _battery_level(entity),
     ),
     PitPatSensorEntityDescription(
         key="network",

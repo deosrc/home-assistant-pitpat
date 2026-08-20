@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from datetime import timedelta
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -76,5 +77,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
 async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
     """Handle options update."""
     coordinator: PitPatDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id][DATA_KEY_COORDINATOR]
-    coordinator.update_interval = _get_update_interval(config_entry)
+    # DataUpdateCoordinator expects a timedelta, matching how it is set in
+    # PitPatDataUpdateCoordinator.__init__.
+    coordinator.update_interval = timedelta(minutes=_get_update_interval(config_entry))
     _LOGGER.info("Coordinator settings updated")

@@ -30,7 +30,9 @@ def _get_phone_home_cadence_raw(entity: PitPatDogEntity) -> str | None:
 def _get_phone_home_cadence(entity: PitPatDogEntity) -> str | None:
     raw_value = _get_phone_home_cadence_raw(entity)
     if raw_value == None:
-        _LOGGER.error('No cadence available.')
+        # Activity monitors do not report a cadence, so this is expected rather
+        # than exceptional on those devices.
+        _LOGGER.debug('No cadence available.')
         return None
 
     option_value = PHONE_HOME_CADENCE_MAP.get(raw_value)
@@ -79,7 +81,10 @@ class PitPatSelectEntity(PitPatDogEntity[PitPatSelectEntityDescription], SelectE
     def current_option(self) -> str | None:
         """Return the selected entity option to represent the entity state."""
         try:
-            return str(self.entity_description.current_option_fn(self))
+            value = self.entity_description.current_option_fn(self)
+            # str(None) is "None", which is not a valid option, so Home Assistant
+            # raises every time the state is written.
+            return None if value is None else str(value)
         except Exception as e:
             raise ValueError(f"Unable to get value for {self.entity_description.key} select entity for dog id {self.dog_id}") from e
 
