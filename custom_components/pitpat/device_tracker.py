@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict
 import dateutil
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.components.device_tracker.config_entry import (
+from homeassistant.components.device_tracker import (
     TrackerEntity,
     TrackerEntityDescription
 )
