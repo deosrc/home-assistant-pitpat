@@ -58,12 +58,15 @@ class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], Generic[TD
     @property
     def device_info(self):
         """Return device information about this device."""
+        model = (self.data_dog.get('Monitor') or {}).get('Model')
         return {
             ATTR_IDENTIFIERS: {(DOMAIN, self.dog_id)},
             ATTR_NAME: self.data_dog.get('Name'),
             ATTR_MANUFACTURER: MANUFACTURER,
-            ATTR_MODEL_ID: self.data_dog.get('Monitor', {}).get('Model'),
-            ATTR_MODEL: DEVICE_MODEL_MAP.get(int(self.data_dog.get('Monitor', {}).get('Model')), ''),
+            # Home Assistant deprecated non-string model_id; it stops working in
+            # 2026.12.
+            ATTR_MODEL_ID: None if model is None else str(model),
+            ATTR_MODEL: '' if model is None else DEVICE_MODEL_MAP.get(int(model), ''),
             ATTR_SW_VERSION: self.data_dog.get("Monitor", {}).get("FirmwareVersion", ""),
             ATTR_HW_VERSION: self.data_dog.get("Monitor", {}).get("HardwareVersion", ""),
             ATTR_SERIAL_NUMBER: self.data_monitor.get('SerialNumber')
