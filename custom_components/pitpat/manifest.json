@@ -3,7 +3,7 @@
   "name": "PitPat",
   "codeowners": ["@deosrc"],
   "config_flow": true,
-  "dependencies": [],
+  "dependencies": ["recorder"],
   "documentation": "https://github.com/deosrc/home-assistant-pitpat",
   "homekit": {},
   "integration_type": "hub",

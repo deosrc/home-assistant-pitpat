@@ -1,0 +1,158 @@
+"""Import PitPat daily activity into Home Assistant long-term statistics.
+
+The live sensors only ever expose the newest record returned by the API, which
+has two consequences the entity history cannot recover from:
+
+* A monitor buffers up to 10 days and only uploads when synced, so between syncs
+  the newest record is stale and the sensors keep reporting it as "today".
+* A sync part-way through a day uploads only the activity up to that point. The
+  day is completed at the *next* sync, by which time the newest record has moved
+  on and the corrected figures are never read.
+
+``AllActivityDays`` returns every buffered day with its current totals, and each
+sync corrects the earlier ones. Re-importing the whole window on every refresh
+therefore repairs history retroactively, whenever the user happens to sync.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+import logging
+
+from homeassistant.components.recorder.models import StatisticData, StatisticMetaData
+from homeassistant.components.recorder.statistics import async_add_external_statistics
+from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
+
+try:  # HA >= 2025.8 -- has_mean is deprecated and removed in 2026.11
+    from homeassistant.components.recorder.models import StatisticMeanType
+
+    _MEAN_META = {"mean_type": StatisticMeanType.ARITHMETIC}
+except ImportError:  # pragma: no cover - older cores
+    _MEAN_META = {"has_mean": True}
+
+try:  # unit_class must name a real converter, or be None
+    from homeassistant.util.unit_conversion import DistanceConverter
+
+    _DISTANCE_CLASS = DistanceConverter.UNIT_CLASS
+except (ImportError, AttributeError):  # pragma: no cover
+    _DISTANCE_CLASS = None
+
+from .const import DOMAIN
+
+_LOGGER = logging.getLogger(__name__)
+
+# The device only holds 10 days, but re-importing a wider window is harmless and
+# covers the case where the API returns more than the device buffered.
+MAX_DAYS = 30
+
+# statistic key -> (API field, label, unit, scale, unit_class)
+# unit_class is None where no unit converter applies; steps/kcal/minutes are all
+# left unconverted rather than guessing at a converter that may reject the unit.
+METRICS: dict[str, tuple[str, str, str, float, str | None]] = {
+    "steps": ("TotalSteps", "Steps", "steps", 1, None),
+    # TotalDistance is reported in metres
+    "distance": ("TotalDistance", "Distance", "km", 0.001, _DISTANCE_CLASS),
+    "calories": ("TotalCalories", "Calories", "kcal", 1, None),
+    "walking": ("TotalWalkMinutes", "Walking", "min", 1, None),
+    "running": ("TotalRunMinutes", "Running", "min", 1, None),
+    "playing": ("TotalPlayMinutes", "Playing", "min", 1, None),
+    "pottering": ("TotalPotteringMinutes", "Pottering", "min", 1, None),
+    "resting": ("TotalRestMinutes", "Resting", "min", 1, None),
+    "exercising": ("Activeness", "Exercising", "min", 1, None),
+}
+
+
+def _slug(value: str) -> str:
+    """Reduce a name to something safe for a statistic_id."""
+    out = "".join(c.lower() if c.isalnum() else "_" for c in value)
+    while "__" in out:
+        out = out.replace("__", "_")
+    return out.strip("_") or "dog"
+
+
+def _day_start(raw_date) -> datetime | None:
+    """Return the UTC instant of local midnight for an API date.
+
+    Statistics must start on an hour boundary. Local midnight converted to UTC
+    satisfies that for whole-hour timezones, which covers UK/EU usage.
+    """
+    if not raw_date:
+        return None
+
+    parsed = None
+    if isinstance(raw_date, datetime):
+        parsed = raw_date
+    elif isinstance(raw_date, str):
+        parsed = dt_util.parse_datetime(raw_date)
+        if parsed is None:
+            parsed = dt_util.parse_date(raw_date)
+
+    if parsed is None:
+        return None
+
+    if isinstance(parsed, datetime):
+        day = (dt_util.as_local(parsed) if parsed.tzinfo else parsed).date()
+    else:
+        day = parsed
+
+    local_midnight = datetime.combine(
+        day, datetime.min.time(), tzinfo=dt_util.DEFAULT_TIME_ZONE
+    )
+    return dt_util.as_utc(local_midnight)
+
+
+def async_import_activity_history(
+    hass: HomeAssistant, dog_name: str | None, all_activity_days: list | None
+) -> None:
+    """Write each day's totals into long-term statistics.
+
+    Re-importing an existing day overwrites it, which is what makes a late sync
+    correct the record rather than duplicate it.
+    """
+    if not all_activity_days:
+        return
+
+    days = sorted(all_activity_days, key=lambda d: d.get("Date") or "")[-MAX_DAYS:]
+    dog = _slug(dog_name or "dog")
+    imported = 0
+
+    for key, (field, label, unit, scale, unit_class) in METRICS.items():
+        points: list[StatisticData] = []
+
+        for day in days:
+            start = _day_start(day.get("Date"))
+            value = day.get(field)
+            if start is None or value is None:
+                continue
+            try:
+                scaled = float(value) * scale
+            except (TypeError, ValueError):
+                continue
+            # One point per day: mean/min/max are equal so any rollup period
+            # renders the day's total.
+            points.append(
+                StatisticData(start=start, mean=scaled, min=scaled, max=scaled)
+            )
+
+        if not points:
+            continue
+
+        metadata = StatisticMetaData(
+            **_MEAN_META,
+            has_sum=False,
+            name=f"{dog_name or 'Dog'} {label} (daily)",
+            source=DOMAIN,
+            statistic_id=f"{DOMAIN}:{dog}_{key}_daily",
+            unit_of_measurement=unit,
+            unit_class=unit_class,
+        )
+        async_add_external_statistics(hass, metadata, points)
+        imported += 1
+
+    _LOGGER.debug(
+        "Imported daily statistics for %s: %s metrics across %s days",
+        dog_name,
+        imported,
+        len(days),
+    )

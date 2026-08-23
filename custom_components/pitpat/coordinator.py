@@ -13,6 +13,7 @@ from homeassistant.helpers.update_coordinator import (
 
 from .api import InvalidCredentialsError, PitPatApiClient
 from .const import DOMAIN
+from .statistics import async_import_activity_history
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -75,18 +76,26 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
         for dog_id in data.keys():
             data[dog_id] = {
                 **data[dog_id],
-                **await self._async_update_dog_data(dog_id)
+                **await self._async_update_dog_data(dog_id, data[dog_id].get('Name'))
             }
 
         return data
 
-    async def _async_update_dog_data(self, dog_id) -> dict:
+    async def _async_update_dog_data(self, dog_id, dog_name=None) -> dict:
         monitor_details = await self.api_client.async_get_monitor(dog_id)
         all_activity_days = await self.api_client.async_get_all_activity_days(dog_id)
 
         activity_today = None
         if (len(all_activity_days) > 0):
             activity_today = sorted(all_activity_days, key=lambda item: item.get('Date'), reverse=True)[0]
+
+        # The live sensors only ever expose the newest record, so a day completed
+        # by a later sync is fetched and discarded. Push every buffered day into
+        # long-term statistics instead, which corrects history retroactively.
+        try:
+            async_import_activity_history(self._hass, dog_name, all_activity_days)
+        except Exception:  # statistics must never break the data refresh
+            _LOGGER.exception('Failed to import daily activity statistics')
 
         return {
             'monitor_details': monitor_details,
