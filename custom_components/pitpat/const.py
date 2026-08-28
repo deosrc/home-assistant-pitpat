@@ -12,6 +12,7 @@ DATA_KEY_COORDINATOR = "coordinator"
 UPDATE_INTERVAL_DEFAULT = 5
 
 class Device(Enum):
+    Unknown = None
     BluetoothActivityMonitor = 3
     GpsTracker = 6
 
