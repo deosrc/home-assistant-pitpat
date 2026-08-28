@@ -110,7 +110,7 @@ DOG_ENTITY_DESCRIPTIONS = [
     PitPatSensorEntityDescription(
         key="battery_voltage",
         translation_key="battery_voltage",
-        device_class=SensorDeviceClass.BATTERY,
+        device_class=SensorDeviceClass.VOLTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=UnitOfElectricPotential.MILLIVOLT,
