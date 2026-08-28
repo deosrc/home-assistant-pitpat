@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 
 import dateutil
 from homeassistant.core import HomeAssistant
@@ -12,6 +12,7 @@ from homeassistant.components.device_tracker import (
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
+    Device,
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
@@ -31,6 +32,9 @@ class PitPatTrackerEntityDescription(TrackerEntityDescription):
     accuracy_fn: Callable[[PitPatDogEntity], float]
     attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
 
+    # The devices the sensor is applicable to. If not provided, sensor will be created for all devices.
+    applicable_devices: List[Device] = None
+
 ENTITY_DESCRIPTIONS = [
     PitPatTrackerEntityDescription(
         key='last_known_position',
@@ -41,7 +45,8 @@ ENTITY_DESCRIPTIONS = [
         accuracy_fn=lambda entity: float(_get_monitor_position(entity).get('Accuracy', {}).get('Metres')),
         attributes_fn=lambda entity: {
             "last_updated": dateutil.parser.parse(_get_monitor_position(entity).get('DataTime'))
-        }
+        },
+        applicable_devices=[Device.GpsTracker],
     ),
     PitPatTrackerEntityDescription(
         key='live_position',
@@ -51,6 +56,7 @@ ENTITY_DESCRIPTIONS = [
         latitude_fn=lambda data: float(_get_monitor_position(data).get('Latitude')),
         longitude_fn=lambda data: float(_get_monitor_position(data).get('Longitude')),
         accuracy_fn=lambda data: float(_get_monitor_position(data).get('Accuracy', {}).get('Metres')),
+        applicable_devices=[Device.GpsTracker],
     )
 ]
 
@@ -60,8 +66,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     sensors = []
 
     for dog_id in coordinator.data.keys():
+        device = Device(coordinator.data.get(dog_id, {}).get('Monitor', {}).get('Model'))
         for description in ENTITY_DESCRIPTIONS:
-            sensors.append(PitPatDogDeviceTrackerEntity(coordinator, dog_id, description))
+            if not description.applicable_devices or device in description.applicable_devices:
+                sensors.append(PitPatDogDeviceTrackerEntity(coordinator, dog_id, description))
 
     async_add_entities(sensors, True)
 
