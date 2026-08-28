@@ -47,6 +47,9 @@
       "weight": {
         "name": "Weight"
       },
+      "battery_voltage": {
+        "name": "Battery Voltage"
+      },
       "battery_level": {
         "name": "Battery Level"
       },

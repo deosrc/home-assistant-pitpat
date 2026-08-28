@@ -6,6 +6,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     EntityCategory,
+    UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfLength,
     UnitOfMass,
@@ -29,12 +30,17 @@ from .entity import PitPatDogEntity
 
 
 def _battery_level(entity: PitPatDogEntity):
-    # Activity monitors do not report BatteryInfo, and the nested keys can be
-    # present but null, so guard before scaling to a percentage.
+    # This needs to be None-aware to prevent errors if the value is missing
     battery_info = entity.data_monitor.get('BatteryInfo') or {}
     value = battery_info.get('Value') or {}
     fraction = value.get('BatteryLevelFraction')
     return None if fraction is None else fraction * 100
+
+
+def _battery_voltage(entity: PitPatDogEntity):
+    battery_info = entity.data_monitor.get('BatteryVoltage') or {}
+    value = battery_info.get('Value') or {}
+    return value.get('Millivolts')
 
 def _get_tracking_mode(entity: PitPatDogEntity):
     reason_id = entity.data_monitor.get('LiveTrackingReason', 0)
@@ -100,6 +106,17 @@ DOG_ENTITY_DESCRIPTIONS = [
         native_unit_of_measurement=UnitOfMass.KILOGRAMS, # TODO: Make sure this is correct based on user settings
         suggested_display_precision=1,
         value_fn=lambda entity: entity.data_dog.get('Weight'),
+    ),
+    PitPatSensorEntityDescription(
+        key="battery_voltage",
+        translation_key="battery_voltage",
+        device_class=SensorDeviceClass.BATTERY,
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfElectricPotential.MILLIVOLT,
+        suggested_display_precision=0,
+        value_fn=lambda entity: _battery_voltage(entity),
+        applicable_devices=[Device.BluetoothActivityMonitor],
     ),
     PitPatSensorEntityDescription(
         key="battery_level",
