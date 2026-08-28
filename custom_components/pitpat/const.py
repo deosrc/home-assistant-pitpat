@@ -11,7 +11,7 @@ DATA_KEY_COORDINATOR = "coordinator"
 UPDATE_INTERVAL_DEFAULT = 5
 
 DEVICE_MODEL_MAP: Dict[int, str] = {
-    3: 'Bluetooth Activity Tracker',
+    3: 'Bluetooth Activity Monitor',
     6: 'GPS Tracker',
 }
 
