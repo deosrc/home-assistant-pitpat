@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, List
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -12,6 +12,7 @@ from .api import PitPatApiClient
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
+    Device,
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
@@ -21,21 +22,27 @@ from .entity import PitPatDogEntity
 class PitPatButtonEntityDescription(ButtonEntityDescription):
     press_fn: Callable[[PitPatApiClient, PitPatDogEntity], None]
 
+    # The devices the sensor is applicable to. If not provided, sensor will be created for all devices.
+    applicable_devices: List[Device] = None
+
 DOG_ENTITY_DESCRIPTIONS = [
     PitPatButtonEntityDescription(
         key="tracking_stop",
         translation_key="tracking_stop",
-        press_fn=lambda api, entity: api.async_tracking_stop(entity.dog_id)
+        press_fn=lambda api, entity: api.async_tracking_stop(entity.dog_id),
+        applicable_devices=[Device.GpsTracker],
     ),
     PitPatButtonEntityDescription(
         key="tracking_start_find",
         translation_key="tracking_start_find",
-        press_fn=lambda api, entity: api.async_tracking_start_find(entity.dog_id)
+        press_fn=lambda api, entity: api.async_tracking_start_find(entity.dog_id),
+        applicable_devices=[Device.GpsTracker],
     ),
     PitPatButtonEntityDescription(
         key="tracking_start_walk",
         translation_key="tracking_start_walk",
-        press_fn=lambda api, entity: api.async_tracking_start_walk(entity.dog_id)
+        press_fn=lambda api, entity: api.async_tracking_start_walk(entity.dog_id),
+        applicable_devices=[Device.GpsTracker],
     ),
 ]
 
@@ -45,8 +52,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     sensors = []
 
     for dog_id in coordinator.data.keys():
+        device = Device(coordinator.data.get(dog_id, {}).get('Monitor', {}).get('Model'))
         for description in DOG_ENTITY_DESCRIPTIONS:
-            sensors.append(PitPatDogButtonEntity(coordinator, dog_id, description))
+            if not description.applicable_devices or device in description.applicable_devices:
+                sensors.append(PitPatDogButtonEntity(coordinator, dog_id, description))
 
     async_add_entities(sensors, True)
 

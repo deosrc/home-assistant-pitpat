@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 
 import dateutil
 from homeassistant.core import HomeAssistant
@@ -22,6 +22,7 @@ from homeassistant.components.sensor import (
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
+    Device,
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
@@ -61,6 +62,9 @@ def _get_tracking_status(entity: PitPatDogEntity):
 class PitPatSensorEntityDescription(SensorEntityDescription):
     value_fn: Callable[[PitPatDogEntity], str | int | float | None]
     attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
+
+    # The devices the sensor is applicable to. If not provided, sensor will be created for all devices.
+    applicable_devices: List[Device] = None
 
 DOG_ENTITY_DESCRIPTIONS = [
     PitPatSensorEntityDescription(
@@ -106,6 +110,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
         value_fn=lambda entity: _battery_level(entity),
+        applicable_devices=[Device.GpsTracker],
     ),
     PitPatSensorEntityDescription(
         key="network",
@@ -113,6 +118,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon='mdi:radio-tower',
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('NetworkOperator', {}).get('Value'),
+        applicable_devices=[Device.GpsTracker],
     ),
     PitPatSensorEntityDescription(
         key="signal_strength",
@@ -123,6 +129,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
         value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality') * 20,
+        applicable_devices=[Device.GpsTracker],
     ),
     PitPatSensorEntityDescription(
         key="last_message_sent",
@@ -131,6 +138,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageSentAt')),
+        applicable_devices=[Device.GpsTracker],
     ),
     PitPatSensorEntityDescription(
         key="last_message_received",
@@ -139,6 +147,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')),
+        applicable_devices=[Device.GpsTracker],
     ),
     PitPatSensorEntityDescription(
         key="next_message_expected",
@@ -147,6 +156,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')),
+        applicable_devices=[Device.GpsTracker],
     ),
     PitPatSensorEntityDescription(
         key="activity_pottering",
@@ -246,12 +256,14 @@ DOG_ENTITY_DESCRIPTIONS = [
         translation_key="live_tracking_mode",
         icon="mdi:map-marker-radius",
         value_fn=lambda entity: _get_tracking_mode(entity),
+        applicable_devices=[Device.GpsTracker],
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_status",
         translation_key="live_tracking_status",
         icon="mdi:satellite-variant",
         value_fn=lambda entity: _get_tracking_status(entity),
+        applicable_devices=[Device.GpsTracker],
     ),
 ]
 
@@ -261,8 +273,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     sensors = []
 
     for dog_id in coordinator.data.keys():
+        device = Device(coordinator.data.get(dog_id, {}).get('Monitor', {}).get('Model'))
         for description in DOG_ENTITY_DESCRIPTIONS:
-            sensors.append(PitPatDogSensorEntity(coordinator, dog_id, description))
+            if not description.applicable_devices or device in description.applicable_devices:
+                sensors.append(PitPatDogSensorEntity(coordinator, dog_id, description))
 
     async_add_entities(sensors, True)
 
