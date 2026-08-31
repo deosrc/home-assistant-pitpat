@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import logging
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 
 from homeassistant.components.select import (
     SelectEntity,
@@ -10,13 +10,13 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from propcache import cached_property
 
 from .api import PitPatApiClient
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
     PHONE_HOME_CADENCE_MAP,
+    Device,
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
@@ -49,6 +49,9 @@ class PitPatSelectEntityDescription(SelectEntityDescription):
     attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
     update_fn: Callable[[PitPatApiClient, PitPatDogEntity, str], None]
 
+    # The devices the sensor is applicable to. If not provided, sensor will be created for all devices.
+    applicable_devices: List[Device] = None
+
 ENTITY_DESCRIPTIONS = [
     PitPatSelectEntityDescription(
         key='phone_home_cadence',
@@ -61,6 +64,7 @@ ENTITY_DESCRIPTIONS = [
             'raw_value': _get_phone_home_cadence_raw(entity)
         },
         update_fn=lambda api, entity, option: api.async_update_phone_home_cadence(entity.dog_id, option),
+        applicable_devices=[Device.GpsTracker]
     )
 ]
 
@@ -70,8 +74,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     sensors = []
 
     for dog_id in coordinator.data.keys():
+        device = Device(coordinator.data.get(dog_id, {}).get('Monitor', {}).get('Model'))
         for description in ENTITY_DESCRIPTIONS:
-            sensors.append(PitPatSelectEntity(coordinator, dog_id, description))
+            if not description.applicable_devices or device in description.applicable_devices:
+                sensors.append(PitPatSelectEntity(coordinator, dog_id, description))
 
     async_add_entities(sensors, True)
 
