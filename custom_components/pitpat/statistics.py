@@ -50,6 +50,13 @@ try:  # unit_class must name a real converter, or be None
 except (ImportError, AttributeError):  # pragma: no cover
     _DISTANCE_CLASS = None
 
+try:  # unit_class must name a real converter, or be None
+    from homeassistant.util.unit_conversion import DurationConverter
+
+    _DURATION_CLASS = DurationConverter.UNIT_CLASS
+except (ImportError, AttributeError):  # pragma: no cover
+    _DURATION_CLASS = None
+
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -77,8 +84,6 @@ METRICS = [
         data_key = "TotalSteps",
         label = "Steps",
         unit_of_measurement = "steps",
-        unit_class = None,
-        value_scale = 1,
     ),
     PitPatStatisticsDescription(
         statistic_key = "distance",
@@ -93,56 +98,48 @@ METRICS = [
         data_key = "TotalCalories",
         label = "Calories",
         unit_of_measurement = "kcal",
-        unit_class = None,
-        value_scale = 1,
     ),
     PitPatStatisticsDescription(
         statistic_key = "walking",
         data_key = "TotalWalkMinutes",
         label = "Walking",
         unit_of_measurement = "min",
-        unit_class = None,
-        value_scale = 1,
+        unit_class = _DURATION_CLASS,
     ),
     PitPatStatisticsDescription(
         statistic_key = "running",
         data_key = "TotalRunMinutes",
         label = "Running",
         unit_of_measurement = "min",
-        unit_class = None,
-        value_scale = 1,
+        unit_class = _DURATION_CLASS,
     ),
     PitPatStatisticsDescription(
         statistic_key = "playing",
         data_key = "TotalPlayMinutes",
         label = "Playing",
         unit_of_measurement = "min",
-        unit_class = None,
-        value_scale = 1,
+        unit_class = _DURATION_CLASS,
     ),
     PitPatStatisticsDescription(
         statistic_key = "pottering",
         data_key = "TotalPotteringMinutes",
         label = "Pottering",
         unit_of_measurement = "min",
-        unit_class = None,
-        value_scale = 1,
+        unit_class = _DURATION_CLASS,
     ),
     PitPatStatisticsDescription(
         statistic_key = "resting",
         data_key = "TotalRestMinutes",
         label = "Resting",
         unit_of_measurement = "min",
-        unit_class = None,
-        value_scale = 1,
+        unit_class = _DURATION_CLASS,
     ),
     PitPatStatisticsDescription(
         statistic_key = "exercising",
         data_key = "Activeness",
         label = "Exercising",
         unit_of_measurement = "min",
-        unit_class = None,
-        value_scale = 1,
+        unit_class = _DURATION_CLASS,
     ),
 ]
 
