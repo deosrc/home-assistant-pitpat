@@ -16,6 +16,7 @@ therefore repairs history retroactively, whenever the user happens to sync.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime
 import logging
 
@@ -46,21 +47,93 @@ _LOGGER = logging.getLogger(__name__)
 # covers the case where the API returns more than the device buffered.
 MAX_DAYS = 30
 
-# statistic key -> (API field, label, unit, scale, unit_class)
+
+@dataclass(frozen=True, kw_only=True)
+class PitPatStatisticsDescription():
+    statistic_key: str
+    data_key: str
+    label: str
+    unit_of_measurement: str
+    unit_class: str | None = None
+    value_scale: float = 1
+
+
 # unit_class is None where no unit converter applies; steps/kcal/minutes are all
 # left unconverted rather than guessing at a converter that may reject the unit.
-METRICS: dict[str, tuple[str, str, str, float, str | None]] = {
-    "steps": ("TotalSteps", "Steps", "steps", 1, None),
-    # TotalDistance is reported in metres
-    "distance": ("TotalDistance", "Distance", "km", 0.001, _DISTANCE_CLASS),
-    "calories": ("TotalCalories", "Calories", "kcal", 1, None),
-    "walking": ("TotalWalkMinutes", "Walking", "min", 1, None),
-    "running": ("TotalRunMinutes", "Running", "min", 1, None),
-    "playing": ("TotalPlayMinutes", "Playing", "min", 1, None),
-    "pottering": ("TotalPotteringMinutes", "Pottering", "min", 1, None),
-    "resting": ("TotalRestMinutes", "Resting", "min", 1, None),
-    "exercising": ("Activeness", "Exercising", "min", 1, None),
-}
+METRICS = [
+    PitPatStatisticsDescription(
+        statistic_key = "steps",
+        data_key = "TotalSteps",
+        label = "Steps",
+        unit_of_measurement = "steps",
+        unit_class = None,
+        value_scale = 1,
+    ),
+    PitPatStatisticsDescription(
+        statistic_key = "distance",
+        data_key = "TotalDistance",
+        label = "Distance",
+        unit_of_measurement = "km",
+        unit_class = _DISTANCE_CLASS,
+        value_scale = 0.001,
+    ),
+    PitPatStatisticsDescription(
+        statistic_key = "calories",
+        data_key = "TotalCalories",
+        label = "Calories",
+        unit_of_measurement = "kcal",
+        unit_class = None,
+        value_scale = 1,
+    ),
+    PitPatStatisticsDescription(
+        statistic_key = "walking",
+        data_key = "TotalWalkMinutes",
+        label = "Walking",
+        unit_of_measurement = "min",
+        unit_class = None,
+        value_scale = 1,
+    ),
+    PitPatStatisticsDescription(
+        statistic_key = "running",
+        data_key = "TotalRunMinutes",
+        label = "Running",
+        unit_of_measurement = "min",
+        unit_class = None,
+        value_scale = 1,
+    ),
+    PitPatStatisticsDescription(
+        statistic_key = "playing",
+        data_key = "TotalPlayMinutes",
+        label = "Playing",
+        unit_of_measurement = "min",
+        unit_class = None,
+        value_scale = 1,
+    ),
+    PitPatStatisticsDescription(
+        statistic_key = "pottering",
+        data_key = "TotalPotteringMinutes",
+        label = "Pottering",
+        unit_of_measurement = "min",
+        unit_class = None,
+        value_scale = 1,
+    ),
+    PitPatStatisticsDescription(
+        statistic_key = "resting",
+        data_key = "TotalRestMinutes",
+        label = "Resting",
+        unit_of_measurement = "min",
+        unit_class = None,
+        value_scale = 1,
+    ),
+    PitPatStatisticsDescription(
+        statistic_key = "exercising",
+        data_key = "Activeness",
+        label = "Exercising",
+        unit_of_measurement = "min",
+        unit_class = None,
+        value_scale = 1,
+    ),
+]
 
 
 def _slug(value: str) -> str:
@@ -117,16 +190,16 @@ def async_import_activity_history(
     dog = _slug(dog_name or "dog")
     imported = 0
 
-    for key, (field, label, unit, scale, unit_class) in METRICS.items():
+    for description in METRICS:
         points: list[StatisticData] = []
 
         for day in days:
             start = _day_start(day.get("Date"))
-            value = day.get(field)
+            value = day.get(description.data_key)
             if start is None or value is None:
                 continue
             try:
-                scaled = float(value) * scale
+                scaled = float(value) * description.value_scale
             except (TypeError, ValueError):
                 continue
             # One point per day: mean/min/max are equal so any rollup period
@@ -141,11 +214,11 @@ def async_import_activity_history(
         metadata = StatisticMetaData(
             **_MEAN_META,
             has_sum=False,
-            name=f"{dog_name or 'Dog'} {label} (daily)",
+            name=f"{dog_name or 'Dog'} {description.label} (daily)",
             source=DOMAIN,
-            statistic_id=f"{DOMAIN}:{dog}_{key}_daily",
-            unit_of_measurement=unit,
-            unit_class=unit_class,
+            statistic_id=f"{DOMAIN}:{dog}_{description.statistic_key}_daily",
+            unit_of_measurement=description.unit_of_measurement,
+            unit_class=description.unit_class,
         )
         async_add_external_statistics(hass, metadata, points)
         imported += 1
