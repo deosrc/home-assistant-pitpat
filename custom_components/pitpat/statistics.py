@@ -186,6 +186,33 @@ def _day_start(raw_date) -> datetime | None:
     return dt_util.as_utc(local_midnight)
 
 
+def _get_statistic_points(description: PitPatStatisticsDescription, data: list) -> list[StatisticData]:
+    points: list[StatisticData] = []
+
+    for day in data:
+        date = day.get("Date")
+        start = _day_start(date)
+        if start is None:
+            _LOGGER.warning("Activity date '%s' is not recognised as a valid date.", date)
+            continue
+
+        value = day.get(description.data_key)
+        if value is None:
+            continue
+
+        try:
+            scaled = float(value) * description.value_scale
+        except (TypeError, ValueError):
+            continue
+        # One point per day: mean/min/max are equal so any rollup period
+        # renders the day's total.
+        points.append(
+            StatisticData(start=start, mean=scaled, min=scaled, max=scaled)
+        )
+
+    return points
+
+
 def async_import_activity_history(
     hass: HomeAssistant, dog_name: str | None, all_activity_days: list | None
 ) -> None:
@@ -202,29 +229,7 @@ def async_import_activity_history(
     imported = 0
 
     for description in METRICS:
-        points: list[StatisticData] = []
-
-        for day in days:
-            date = day.get("Date")
-            start = _day_start(date)
-            if start is None:
-                _LOGGER.warning("Activity date '%s' is not recognised as a valid date.", date)
-                continue
-
-            value = day.get(description.data_key)
-            if value is None:
-                continue
-
-            try:
-                scaled = float(value) * description.value_scale
-            except (TypeError, ValueError):
-                continue
-            # One point per day: mean/min/max are equal so any rollup period
-            # renders the day's total.
-            points.append(
-                StatisticData(start=start, mean=scaled, min=scaled, max=scaled)
-            )
-
+        points = _get_statistic_points(description, days)
         if not points:
             continue
 

@@ -30,5 +30,40 @@ class StatisticsUnitTests(unittest.TestCase):
                 result = statistics._day_start(raw_input)
                 self.assertEqual(expected, result)
 
+    def test_get_statistic_points(self):
+        # Arrange
+        description = statistics.PitPatStatisticsDescription(
+            statistic_key='test',
+            data_key='Value',
+            label='Test',
+            unit_of_measurement='count',
+            value_scale=0.1
+        )
+
+        inputs = [
+            ('No data', [], []),
+            (
+                'Missing key',
+                [{'Date': '2026-08-30', 'Value': 1234}, {'Date': '2026-08-31'}],
+                [{'max': 123.4, 'mean': 123.4, 'min': 123.4, 'start': datetime.datetime(2026, 8, 30, tzinfo=datetime.UTC)}]
+            ),
+            (
+                'Success',
+                [{'Date': '2026-08-30', 'Value': 1234}, {'Date': '2026-08-31', 'Value': 123}],
+                [
+                    {'max': 123.4, 'mean': 123.4, 'min': 123.4, 'start': datetime.datetime(2026, 8, 30, tzinfo=datetime.UTC)},
+                    {'max': 12.3, 'mean': 12.3, 'min': 12.3, 'start': datetime.datetime(2026, 8, 31, tzinfo=datetime.UTC)},
+                ]
+            ),
+        ]
+
+        for test, raw_input, expected in inputs:
+            with self.subTest(test):
+                # Act
+                result = statistics._get_statistic_points(description, raw_input)
+
+                # Assert
+                self.assertEqual(expected, result)
+
 if __name__ == '__main__':
     unittest.main()
