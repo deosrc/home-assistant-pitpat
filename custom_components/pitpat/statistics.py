@@ -1,17 +1,28 @@
 """Import PitPat daily activity into Home Assistant long-term statistics.
 
-The live sensors only ever expose the newest record returned by the API, which
-has two consequences the entity history cannot recover from:
+This is mostly for the Bluetooth Activity Tracker, but can also be used for the GPS
+Tracker.
 
-* A monitor buffers up to 10 days and only uploads when synced, so between syncs
-  the newest record is stale and the sensors keep reporting it as "today".
-* A sync part-way through a day uploads only the activity up to that point. The
-  day is completed at the *next* sync, by which time the newest record has moved
-  on and the corrected figures are never read.
+For the Bluetooth Tracker, the device stores up to 10 days of activity and only
+uploads the data when synced via the PitPat app. The entities only show the latest
+information from the API, meaning that:
 
-``AllActivityDays`` returns every buffered day with its current totals, and each
-sync corrects the earlier ones. Re-importing the whole window on every refresh
-therefore repairs history retroactively, whenever the user happens to sync.
+- Historic data would not be available unless synced every day.
+- The stats for a given day would only cover up to the point where the data is synced.
+
+This module is called from the coordinator update method to solve this problem by
+writing historic data to statistics. This will re-import the whole window on every
+refresh and therefore repair history retroactively, whenever the user happens to sync.
+
+Note that Home Assistant will automatically record statistics for entities and use these
+for various graphs. These are likely more useful for the GPS tracker (unless it loses
+signal). Updating the entity statistics retro-actively may cause unexpected results and
+is not recommended. Therefore, the statistics here are imported to separate "external"
+statistics visible at `/config/tools/statistics` or via the `recorder.get_statistics`
+action. The Ids are `pitpat:<dog_name>_<stat>_daily`. Dog name was used in rather than
+dog Id as the search in the select field for `recorder.get_statistics` seems to only
+search on the Statistic Id. Therefore, using the dog name makes them more easily
+accessible.
 """
 
 from __future__ import annotations
