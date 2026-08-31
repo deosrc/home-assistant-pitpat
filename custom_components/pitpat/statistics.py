@@ -165,9 +165,12 @@ def _day_start(raw_date) -> datetime | None:
     if isinstance(raw_date, datetime):
         parsed = raw_date
     elif isinstance(raw_date, str):
-        parsed = dt_util.parse_datetime(raw_date)
-        if parsed is None:
-            parsed = dt_util.parse_date(raw_date)
+        try:
+            parsed = dt_util.parse_datetime(raw_date)
+            if parsed is None:
+                parsed = dt_util.parse_date(raw_date)
+        except:
+            return None
 
     if parsed is None:
         return None
@@ -202,10 +205,16 @@ def async_import_activity_history(
         points: list[StatisticData] = []
 
         for day in days:
-            start = _day_start(day.get("Date"))
-            value = day.get(description.data_key)
-            if start is None or value is None:
+            date = day.get("Date")
+            start = _day_start(date)
+            if start is None:
+                _LOGGER.warning("Activity date '%s' is not recognised as a valid date.", date)
                 continue
+
+            value = day.get(description.data_key)
+            if value is None:
+                continue
+
             try:
                 scaled = float(value) * description.value_scale
             except (TypeError, ValueError):
