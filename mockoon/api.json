@@ -5,7 +5,7 @@
   "endpointPrefix": "",
   "latency": 0,
   "port": 5101,
-  "hostname": "",
+  "hostname": "0.0.0.0",
   "folders": [],
   "routes": [
     {
