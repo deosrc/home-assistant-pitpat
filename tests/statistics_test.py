@@ -4,6 +4,18 @@ import datetime
 
 class StatisticsUnitTests(unittest.TestCase):
 
+    def test_slug(self):
+        inputs = [
+            ('Scooby Doo', 'scooby_doo'),
+            ('Scrappy-Doo', 'scrappy_doo'),
+            ('abc!"£ 123', 'abc_123'),
+        ]
+
+        for raw_input, expected in inputs:
+            with self.subTest(raw_input):
+                result = statistics._slug(raw_input)
+                self.assertEqual(expected, result)
+
     def test_day_start(self):
         inputs = [
             (None, None),
