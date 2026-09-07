@@ -66,9 +66,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     sensors = []
 
     for dog_id in coordinator.data.keys():
-        device = Device(coordinator.data.get(dog_id, {}).get('Monitor', {}).get('Model'))
+        device = Device.from_model(coordinator.data.get(dog_id, {}).get('Monitor', {}).get('Model'))
         for description in ENTITY_DESCRIPTIONS:
-            if not description.applicable_devices or device in description.applicable_devices:
+            if not description.applicable_devices or device == Device.Unknown or device in description.applicable_devices:
                 sensors.append(PitPatDogDeviceTrackerEntity(coordinator, dog_id, description))
 
     async_add_entities(sensors, True)
