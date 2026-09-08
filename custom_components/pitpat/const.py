@@ -16,6 +16,13 @@ class Device(Enum):
     BluetoothActivityMonitor = 3
     GpsTracker = 6
 
+    @classmethod
+    def from_model(cls, model: int | None) -> Device:
+        try:
+            return cls(model)
+        except ValueError:
+            return cls.Unknown
+
 DEVICE_MODEL_MAP: Dict[int, str] = {
     Device.BluetoothActivityMonitor.value: 'Bluetooth Activity Monitor',
     Device.GpsTracker.value: 'GPS Tracker',
