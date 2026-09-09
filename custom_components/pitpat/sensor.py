@@ -127,7 +127,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
         value_fn=lambda entity: _battery_level(entity),
-        applicable_devices=[Device.GpsTracker],
+        applicable_devices=[Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="network",
@@ -135,7 +135,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon='mdi:radio-tower',
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('NetworkOperator', {}).get('Value'),
-        applicable_devices=[Device.GpsTracker],
+        applicable_devices=[Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="signal_strength",
@@ -146,7 +146,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
         value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality') * 20,
-        applicable_devices=[Device.GpsTracker],
+        applicable_devices=[Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="last_message_sent",
@@ -155,7 +155,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageSentAt')),
-        applicable_devices=[Device.GpsTracker],
+        applicable_devices=[Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="last_message_received",
@@ -164,7 +164,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')),
-        applicable_devices=[Device.GpsTracker],
+        applicable_devices=[Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="next_message_expected",
@@ -173,7 +173,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')),
-        applicable_devices=[Device.GpsTracker],
+        applicable_devices=[Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="activity_pottering",
@@ -273,14 +273,14 @@ DOG_ENTITY_DESCRIPTIONS = [
         translation_key="live_tracking_mode",
         icon="mdi:map-marker-radius",
         value_fn=lambda entity: _get_tracking_mode(entity),
-        applicable_devices=[Device.GpsTracker],
+        applicable_devices=[Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_status",
         translation_key="live_tracking_status",
         icon="mdi:satellite-variant",
         value_fn=lambda entity: _get_tracking_status(entity),
-        applicable_devices=[Device.GpsTracker],
+        applicable_devices=[Device.GpsTrackerV2],
     ),
 ]
 

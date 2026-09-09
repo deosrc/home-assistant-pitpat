@@ -11,10 +11,12 @@ DATA_KEY_COORDINATOR = "coordinator"
 
 UPDATE_INTERVAL_DEFAULT = 5
 
+# Device enum member names are based on current knowledge and may require
+# renaming as new hardware revisions are discovered.
 class Device(Enum):
     Unknown = None
     BluetoothActivityMonitor = 3
-    GpsTracker = 6
+    GpsTrackerV2 = 6
 
     @classmethod
     def from_model(cls, model: int | None) -> Device:
@@ -25,7 +27,7 @@ class Device(Enum):
 
 DEVICE_MODEL_MAP: Dict[int, str] = {
     Device.BluetoothActivityMonitor.value: 'Bluetooth Activity Monitor',
-    Device.GpsTracker.value: 'GPS Tracker',
+    Device.GpsTrackerV2.value: 'GPS Tracker',
 }
 
 PHONE_HOME_CADENCE_MAP: Dict[int, str] = {

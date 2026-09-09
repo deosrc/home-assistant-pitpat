@@ -6,7 +6,7 @@ class DeviceUnitTests(unittest.TestCase):
     def test_from_model_known(self):
         inputs = [
             (3, Device.BluetoothActivityMonitor),
-            (6, Device.GpsTracker),
+            (6, Device.GpsTrackerV2),
         ]
 
         for raw_input, expected in inputs:

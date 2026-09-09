@@ -31,7 +31,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         key="live_tracking_active",
         translation_key="live_tracking_active",
         value_fn=lambda entity: entity.data_monitor.get('LiveTrackingReason', 0) != 0,
-        applicable_devices=[Device.GpsTracker],
+        applicable_devices=[Device.GpsTrackerV2],
     ),
     PitPatBinarySensorEntityDescription(
         key="charging_status",
