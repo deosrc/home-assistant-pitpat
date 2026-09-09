@@ -22,7 +22,7 @@ class Device(Enum):
     GpsTrackerV2 = 6
 
     @classmethod
-    def from_model(cls, model: int | None):
+    def from_model(cls, model: int | None) -> Device:
         try:
             return cls(model)
         except ValueError:
