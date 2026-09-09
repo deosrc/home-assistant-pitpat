@@ -46,7 +46,7 @@ ENTITY_DESCRIPTIONS = [
         attributes_fn=lambda entity: {
             "last_updated": dateutil.parser.parse(_get_monitor_position(entity).get('DataTime'))
         },
-        applicable_devices=[Device.GpsTrackerV2],
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatTrackerEntityDescription(
         key='live_position',
@@ -56,7 +56,7 @@ ENTITY_DESCRIPTIONS = [
         latitude_fn=lambda data: float(_get_monitor_position(data).get('Latitude')),
         longitude_fn=lambda data: float(_get_monitor_position(data).get('Longitude')),
         accuracy_fn=lambda data: float(_get_monitor_position(data).get('Accuracy', {}).get('Metres')),
-        applicable_devices=[Device.GpsTrackerV2],
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     )
 ]
 

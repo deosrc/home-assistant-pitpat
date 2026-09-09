@@ -16,6 +16,7 @@ UPDATE_INTERVAL_DEFAULT = 5
 class Device(Enum):
     Unknown = None
     BluetoothActivityMonitor = 3
+    GpsTrackerV1 = 4
     GpsTrackerV2 = 6
 
     @classmethod
@@ -27,6 +28,7 @@ class Device(Enum):
 
 DEVICE_MODEL_MAP: Dict[int, str] = {
     Device.BluetoothActivityMonitor.value: 'Bluetooth Activity Monitor',
+    Device.GpsTrackerV1.value: 'GPS Tracker',
     Device.GpsTrackerV2.value: 'GPS Tracker',
 }
 

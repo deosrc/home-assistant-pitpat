@@ -64,7 +64,7 @@ ENTITY_DESCRIPTIONS = [
             'raw_value': _get_phone_home_cadence_raw(entity)
         },
         update_fn=lambda api, entity, option: api.async_update_phone_home_cadence(entity.dog_id, option),
-        applicable_devices=[Device.GpsTrackerV2]
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2]
     )
 ]
 

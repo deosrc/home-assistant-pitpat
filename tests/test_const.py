@@ -6,6 +6,7 @@ class DeviceUnitTests(unittest.TestCase):
     def test_from_model_known(self):
         inputs = [
             (3, Device.BluetoothActivityMonitor),
+            (4, Device.GpsTrackerV1),
             (6, Device.GpsTrackerV2),
         ]
 
