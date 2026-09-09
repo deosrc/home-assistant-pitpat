@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 from typing import Dict
 
@@ -13,10 +15,13 @@ DATA_KEY_COORDINATOR = "coordinator"
 UPDATE_INTERVAL_DEFAULT = 5
 SIGNAL_GRACE_PERIOD_DEFAULT = 30
 
+# Device enum member names are based on current knowledge and may require
+# renaming as new hardware revisions are discovered.
 class Device(Enum):
     Unknown = None
     BluetoothActivityMonitor = 3
-    GpsTracker = 6
+    GpsTrackerV1 = 4
+    GpsTrackerV2 = 6
 
     @classmethod
     def from_model(cls, model: int | None) -> Device:
@@ -27,7 +32,8 @@ class Device(Enum):
 
 DEVICE_MODEL_MAP: Dict[int, str] = {
     Device.BluetoothActivityMonitor.value: 'Bluetooth Activity Monitor',
-    Device.GpsTracker.value: 'GPS Tracker',
+    Device.GpsTrackerV1.value: 'GPS Tracker',
+    Device.GpsTrackerV2.value: 'GPS Tracker',
 }
 
 PHONE_HOME_CADENCE_MAP: Dict[int, str] = {
