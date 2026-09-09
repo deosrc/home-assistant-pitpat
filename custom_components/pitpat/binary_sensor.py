@@ -18,10 +18,17 @@ from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
 
 
+def _activity_today(entity: PitPatDogEntity) -> dict:
+    return entity.data_dog.get('activity_today') or {}
+
+def _activity_available(entity: PitPatDogEntity) -> bool:
+    return entity.data_dog.get('activity_today') is not None
+
 @dataclass(frozen=True, kw_only=True)
 class PitPatBinarySensorEntityDescription(BinarySensorEntityDescription):
     value_fn: Callable[[PitPatDogEntity], str | int | float | None]
     attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
+    available_fn: Callable[[PitPatDogEntity], bool] = lambda entity: True
 
     # The devices the sensor is applicable to. If not provided, sensor will be created for all devices.
     applicable_devices: List[Device] = None
@@ -43,7 +50,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         key='user_goal_achieved',
         translation_key='user_goal_achieved',
         icon="mdi:flag-checkered",
-        value_fn=lambda entity: bool(entity.data_dog.get('activity_today', {}).get('UserGoalAchieved', False))
+        value_fn=lambda entity: bool(_activity_today(entity).get('UserGoalAchieved', False)),
+        available_fn=_activity_available,
     )
 ]
 
@@ -61,6 +69,13 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     async_add_entities(sensors, True)
 
 class PitPatDogBinarySensorEntity(PitPatDogEntity[PitPatBinarySensorEntityDescription], BinarySensorEntity):
+
+    @property
+    def available(self) -> bool:
+        try:
+            return super().available and self.entity_description.available_fn(self)
+        except Exception as e:
+            raise ValueError(f"Unable to get availability value for {self.entity_description.key} binary sensor entity for dog id {self.dog_id}") from e
 
     @property
     def is_on(self):
