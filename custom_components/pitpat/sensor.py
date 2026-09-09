@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List
+from zoneinfo import ZoneInfo
 
 import dateutil
 from homeassistant.core import HomeAssistant
@@ -19,11 +21,14 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
+from homeassistant.util import dt as dt_util
 
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
     Device,
+    OPTIONS_KEY_SIGNAL_GRACE_PERIOD,
+    SIGNAL_GRACE_PERIOD_DEFAULT,
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
@@ -63,6 +68,32 @@ def _get_tracking_status(entity: PitPatDogEntity):
         return 'Tracking'
     else:
         return 'unknown'
+
+def _parse_london_time(value: str) -> datetime | None:
+    try:
+        parsed = dateutil.parser.parse(value)
+    except (ValueError, OverflowError, TypeError):
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=ZoneInfo('Europe/London'))
+    return parsed
+
+def _get_signal_strength(entity: PitPatDogEntity):
+    """Return the signal strength, or 0 if the tracker is overdue phoning home."""
+    quality = entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality')
+    if quality is None:
+        return None
+
+    expected_at_value = entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')
+    if expected_at_value:
+        expected_at = _parse_london_time(expected_at_value)
+        if expected_at:
+            grace_period_minutes = entity.coordinator.config_entry.options.get(
+                OPTIONS_KEY_SIGNAL_GRACE_PERIOD, SIGNAL_GRACE_PERIOD_DEFAULT)
+            if dt_util.now() > expected_at + timedelta(minutes=grace_period_minutes):
+                return 0
+
+    return quality * 20
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatSensorEntityDescription(SensorEntityDescription):
@@ -145,7 +176,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality') * 20,
+        value_fn=_get_signal_strength,
         applicable_devices=[Device.GpsTracker],
     ),
     PitPatSensorEntityDescription(

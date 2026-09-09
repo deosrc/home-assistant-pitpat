@@ -25,7 +25,8 @@
     "step": {
       "init": {
         "data": {
-          "update_interval": "Update Interval (Minutes)"
+          "update_interval": "Update Interval (Minutes)",
+          "signal_grace_period": "Signal Grace Period (Minutes)"
         }
       }
     }
