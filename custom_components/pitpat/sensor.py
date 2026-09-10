@@ -78,27 +78,32 @@ def _parse_london_time(value: str) -> datetime | None:
         return parsed.replace(tzinfo=ZoneInfo('Europe/London'))
     return parsed
 
+def _is_tracker_overdue(entity: PitPatDogEntity):
+    """Return True if the tracker is overdue phoning home beyond the configured grace period."""
+    expected_at_value = entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')
+    if not expected_at_value:
+        return False
+    expected_at = _parse_london_time(expected_at_value)
+    if not expected_at:
+        return False
+    grace_period_minutes = entity.coordinator.config_entry.options.get(
+        OPTIONS_KEY_SIGNAL_GRACE_PERIOD, SIGNAL_GRACE_PERIOD_DEFAULT)
+    return dt_util.now() > expected_at + timedelta(minutes=grace_period_minutes)
+
 def _get_signal_strength(entity: PitPatDogEntity):
     """Return the signal strength, or 0 if the tracker is overdue phoning home."""
     quality = entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality')
     if quality is None:
         return None
-
-    expected_at_value = entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')
-    if expected_at_value:
-        expected_at = _parse_london_time(expected_at_value)
-        if expected_at:
-            grace_period_minutes = entity.coordinator.config_entry.options.get(
-                OPTIONS_KEY_SIGNAL_GRACE_PERIOD, SIGNAL_GRACE_PERIOD_DEFAULT)
-            if dt_util.now() > expected_at + timedelta(minutes=grace_period_minutes):
-                return 0
-
+    if _is_tracker_overdue(entity):
+        return 0
     return quality * 20
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatSensorEntityDescription(SensorEntityDescription):
     value_fn: Callable[[PitPatDogEntity], str | int | float | None]
     attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
+    available_fn: Callable[[PitPatDogEntity], bool] = None
 
     # The devices the sensor is applicable to. If not provided, sensor will be created for all devices.
     applicable_devices: List[Device] = None
@@ -166,6 +171,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon='mdi:radio-tower',
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('NetworkOperator', {}).get('Value'),
+        available_fn=lambda entity: not _is_tracker_overdue(entity),
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
@@ -329,6 +335,12 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     async_add_entities(sensors, True)
 
 class PitPatDogSensorEntity(PitPatDogEntity[PitPatSensorEntityDescription], SensorEntity):
+
+    @property
+    def available(self) -> bool:
+        if self.entity_description.available_fn:
+            return self.entity_description.available_fn(self)
+        return super().available
 
     @property
     def native_value(self):
