@@ -8,10 +8,12 @@ DOMAIN = "pitpat"
 MANUFACTURER = "PitPat"
 
 OPTIONS_KEY_UPDATE_INTERVAL = "update_interval"
+OPTIONS_KEY_SIGNAL_GRACE_PERIOD = "signal_grace_period"
 
 DATA_KEY_COORDINATOR = "coordinator"
 
 UPDATE_INTERVAL_DEFAULT = 5
+SIGNAL_GRACE_PERIOD_DEFAULT = 30
 
 # Device enum member names are based on current knowledge and may require
 # renaming as new hardware revisions are discovered.
