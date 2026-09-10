@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from datetime import datetime
+import logging
 from typing import Any, Callable, Dict, List
 
 import dateutil
@@ -27,6 +29,9 @@ from .const import (
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def _battery_level(entity: PitPatDogEntity):
@@ -63,6 +68,18 @@ def _get_tracking_status(entity: PitPatDogEntity):
         return 'Tracking'
     else:
         return 'unknown'
+
+def _get_contact_timing(entity: PitPatDogEntity, key: str) -> datetime | None:
+    raw_value = entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')
+    if raw_value is None:
+        return None
+
+    try:
+        return dateutil.parser.parse(raw_value)
+    except Exception as err:
+        _LOGGER.warning("Unable to convert '%s' value '%s': %s", key, raw_value, str(err), exc_info=err)
+
+    return None
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatSensorEntityDescription(SensorEntityDescription):
@@ -154,7 +171,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-arrow-right-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageSentAt')),
+        value_fn=lambda entity: _get_contact_timing(entity, 'LastMessageSentAt'),
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
@@ -163,7 +180,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-arrow-left-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')),
+        value_fn=lambda entity: _get_contact_timing(entity, 'LastMessageReceivedAt'),
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
@@ -172,7 +189,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-fast-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')),
+        value_fn=lambda entity: _get_contact_timing(entity, 'NextMessageExpectedAt'),
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
