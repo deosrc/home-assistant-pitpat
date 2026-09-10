@@ -18,7 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 OPTIONS_SCHEMA = vol.Schema(
     {
         vol.Required(OPTIONS_KEY_UPDATE_INTERVAL, default=UPDATE_INTERVAL_DEFAULT): vol.All(vol.Coerce(int), vol.Range(min=1)),
-        vol.Required(OPTIONS_KEY_SIGNAL_GRACE_PERIOD, default=SIGNAL_GRACE_PERIOD_DEFAULT): vol.All(vol.Coerce(int), vol.Range(min=0)),
+        vol.Required(OPTIONS_KEY_SIGNAL_GRACE_PERIOD, default=SIGNAL_GRACE_PERIOD_DEFAULT): vol.All(vol.Coerce(int), vol.Range(min=1)),
     }
 )
 
