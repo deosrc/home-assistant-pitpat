@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from datetime import datetime
+import logging
 from typing import Any, Callable, Dict, List
 
 import dateutil
@@ -27,6 +29,7 @@ from .const import (
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
+from .typeutils import to_nullable_int, to_nullable_datetime
 
 
 def _battery_level(entity: PitPatDogEntity):
@@ -35,7 +38,6 @@ def _battery_level(entity: PitPatDogEntity):
     value = battery_info.get('Value') or {}
     fraction = value.get('BatteryLevelFraction')
     return None if fraction is None else fraction * 100
-
 
 def _battery_voltage(entity: PitPatDogEntity):
     battery_info = entity.data_monitor.get('BatteryVoltage') or {}
@@ -63,6 +65,22 @@ def _get_tracking_status(entity: PitPatDogEntity):
         return 'Tracking'
     else:
         return 'unknown'
+
+def _get_contact_timing(entity: PitPatDogEntity, key: str) -> datetime | None:
+    raw_value = entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get(key)
+    return to_nullable_datetime(raw_value)
+
+def _get_signal_strength(entity: PitPatDogEntity):
+    raw_value = entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality')
+    return None if raw_value is None else (raw_value * 20)
+
+def _get_user_goal_progress(entity: PitPatDogEntity):
+    activeness = entity.data_dog.get('activity_today', {}).get('Activeness', 0)
+    user_goal = entity.data_dog.get('activity_today', {}).get('UserGoal', 0)
+    if activeness is None or user_goal is None:
+        return None
+    return (activeness / user_goal) * 100
+
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatSensorEntityDescription(SensorEntityDescription):
@@ -96,7 +114,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         translation_key="date_of_birth",
         icon="mdi:calendar",
         device_class=SensorDeviceClass.DATE,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_dog.get('BirthDate')).date(),
+        value_fn=lambda entity: to_nullable_datetime(entity.data_dog.get('BirthDate')).date(),
     ),
     PitPatSensorEntityDescription(
         key="weight",
@@ -145,7 +163,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality') * 20,
+        value_fn=_get_signal_strength,
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
@@ -154,7 +172,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-arrow-right-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageSentAt')),
+        value_fn=lambda entity: _get_contact_timing(entity, 'LastMessageSentAt'),
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
@@ -163,7 +181,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-arrow-left-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')),
+        value_fn=lambda entity: _get_contact_timing(entity, 'LastMessageReceivedAt'),
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
@@ -172,7 +190,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-fast-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')),
+        value_fn=lambda entity: _get_contact_timing(entity, 'NextMessageExpectedAt'),
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
@@ -266,20 +284,20 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: (entity.data_dog.get('activity_today', {}).get('Activeness', 0) / entity.data_dog.get('activity_today', {}).get('UserGoal', 0)) * 100,
+        value_fn=_get_user_goal_progress,
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_mode",
         translation_key="live_tracking_mode",
         icon="mdi:map-marker-radius",
-        value_fn=lambda entity: _get_tracking_mode(entity),
+        value_fn=_get_tracking_mode,
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_status",
         translation_key="live_tracking_status",
         icon="mdi:satellite-variant",
-        value_fn=lambda entity: _get_tracking_status(entity),
+        value_fn=_get_tracking_status,
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
 ]
