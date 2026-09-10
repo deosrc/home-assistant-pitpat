@@ -17,6 +17,41 @@
       "type": "shell",
       "command": "rm -r ${workspaceFolder}/.data",
       "problemMatcher": []
+    },
+    {
+      "label": "Run Mock API: auth.pitpat.com",
+      "type": "shell",
+      "command": "mockoon-cli start --data=./mockoon/auth.json",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Mock API: api.pitpat.com",
+      "type": "shell",
+      "command": "mockoon-cli start --data=./mockoon/api.json",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Mock API: activity.pitpat.com",
+      "type": "shell",
+      "command": "mockoon-cli start --data=./mockoon/activity.json",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Mock API: location.pitpat.com",
+      "type": "shell",
+      "command": "mockoon-cli start --data=./mockoon/location.json",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run All Mock APIs",
+      "dependsOn": [
+        "Run Mock API: auth.pitpat.com",
+        "Run Mock API: api.pitpat.com",
+        "Run Mock API: activity.pitpat.com",
+        "Run Mock API: location.pitpat.com"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
     }
   ]
 }
