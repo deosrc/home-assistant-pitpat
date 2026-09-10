@@ -29,10 +29,7 @@ from .const import (
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
-from .typeutils import to_nullable_datetime
-
-
-_LOGGER = logging.getLogger(__name__)
+from .typeutils import to_nullable_int, to_nullable_datetime
 
 
 def _battery_level(entity: PitPatDogEntity):
@@ -41,7 +38,6 @@ def _battery_level(entity: PitPatDogEntity):
     value = battery_info.get('Value') or {}
     fraction = value.get('BatteryLevelFraction')
     return None if fraction is None else fraction * 100
-
 
 def _battery_voltage(entity: PitPatDogEntity):
     battery_info = entity.data_monitor.get('BatteryVoltage') or {}
@@ -73,6 +69,11 @@ def _get_tracking_status(entity: PitPatDogEntity):
 def _get_contact_timing(entity: PitPatDogEntity, key: str) -> datetime | None:
     raw_value = entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get(key)
     return to_nullable_datetime(raw_value)
+
+def _get_signal_strength(entity: PitPatDogEntity):
+    raw_value = entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality')
+    return None if raw_value is None else (raw_value * 20)
+
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatSensorEntityDescription(SensorEntityDescription):
@@ -155,7 +156,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality') * 20,
+        value_fn=_get_signal_strength,
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
