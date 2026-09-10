@@ -29,6 +29,7 @@ from .const import (
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
+from .typeutils import to_nullable_datetime
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -70,16 +71,8 @@ def _get_tracking_status(entity: PitPatDogEntity):
         return 'unknown'
 
 def _get_contact_timing(entity: PitPatDogEntity, key: str) -> datetime | None:
-    raw_value = entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')
-    if raw_value is None:
-        return None
-
-    try:
-        return dateutil.parser.parse(raw_value)
-    except Exception as err:
-        _LOGGER.warning("Unable to convert '%s' value '%s': %s", key, raw_value, str(err), exc_info=err)
-
-    return None
+    raw_value = entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get(key)
+    return to_nullable_datetime(raw_value)
 
 @dataclass(frozen=True, kw_only=True)
 class PitPatSensorEntityDescription(SensorEntityDescription):
