@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Generic, TypeVar
 
 from homeassistant.const import (
     ATTR_HW_VERSION,
@@ -20,12 +20,14 @@ from .const import (
 )
 from .coordinator import PitPatDataUpdateCoordinator
 
+TDescription = TypeVar('TDescription', bound=EntityDescription)
 
-class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator]):
+class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator], Generic[TDescription]):
 
+    entity_description: TDescription
     _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
 
-    def __init__(self, coordinator: PitPatDataUpdateCoordinator, dog_id: str, description: EntityDescription):
+    def __init__(self, coordinator: PitPatDataUpdateCoordinator, dog_id: str, description: TDescription):
         CoordinatorEntity.__init__(self, coordinator)
         self.__dog_id = dog_id
         self.entity_description = description
@@ -41,7 +43,7 @@ class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator]):
 
     @property
     def data_dog(self) -> dict:
-        return self.coordinator.dogs.get(self.dog_id)
+        return self.coordinator.data.get(self.dog_id, {})
 
     @property
     def data_monitor(self) -> dict:
@@ -56,12 +58,15 @@ class PitPatDogEntity(CoordinatorEntity[PitPatDataUpdateCoordinator]):
     @property
     def device_info(self):
         """Return device information about this device."""
+        model = (self.data_dog.get('Monitor') or {}).get('Model')
         return {
             ATTR_IDENTIFIERS: {(DOMAIN, self.dog_id)},
             ATTR_NAME: self.data_dog.get('Name'),
             ATTR_MANUFACTURER: MANUFACTURER,
-            ATTR_MODEL_ID: self.data_dog.get('Monitor', {}).get('Model'),
-            ATTR_MODEL: DEVICE_MODEL_MAP.get(int(self.data_dog.get('Monitor', {}).get('Model')), ''),
+            # Home Assistant deprecated non-string model_id; it stops working in
+            # 2026.12.
+            ATTR_MODEL_ID: None if model is None else str(model),
+            ATTR_MODEL: '' if model is None else DEVICE_MODEL_MAP.get(int(model), ''),
             ATTR_SW_VERSION: self.data_dog.get("Monitor", {}).get("FirmwareVersion", ""),
             ATTR_HW_VERSION: self.data_dog.get("Monitor", {}).get("HardwareVersion", ""),
             ATTR_SERIAL_NUMBER: self.data_monitor.get('SerialNumber')

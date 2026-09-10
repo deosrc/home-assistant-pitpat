@@ -13,13 +13,14 @@ from homeassistant.helpers.update_coordinator import (
 
 from .api import InvalidCredentialsError, PitPatApiClient
 from .const import DOMAIN
+from .statistics import async_import_activity_history
 
 _LOGGER = logging.getLogger(__name__)
 
-class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
-    """DataUpdateCoordinator to handle fetching data from PitPat."""
+TCoordinatorData = Dict[str, dict]
 
-    dogs: Dict[str, dict]
+class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
+    """DataUpdateCoordinator to handle fetching data from PitPat."""
 
     def __init__(self, hass: HomeAssistant, update_interval: int, config_entry: ConfigEntry):
         """Initialize the coordinator and set up the Controller object."""
@@ -53,31 +54,34 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         except InvalidCredentialsError as err:
             raise ConfigEntryAuthFailed() from err
 
-    async def _async_update_data(self):
+    async def _async_update_data(self) -> TCoordinatorData:
         """Fetch data"""
         try:
-            await self._async_refresh_data()
+            return await self._async_refresh_data()
         except ConfigEntryAuthFailed as err:
             _LOGGER.info('API client is not authenticated. Attempting to re-authenticate.', exc_info=err)
             self.api_client = None
-            await self._async_refresh_data()
+            return await self._async_refresh_data()
         except Exception as err:
             _LOGGER.warning('Request failed. Retrying with new API client.', exc_info=err)
             self.api_client = None
-            await self._async_refresh_data()
+            return await self._async_refresh_data()
 
-    async def _async_refresh_data(self) -> None:
+    async def _async_refresh_data(self) -> TCoordinatorData:
         await self._async_ensure_ready()
 
         dogs = await self.api_client.async_get_dogs()
-        self.dogs = { d['Id']: d for d in dogs}
+        data = { d['Id']: d for d in dogs}
 
-        for dog_id in self.dogs.keys():
-            self.dogs[dog_id] = await self._async_update_dog_data(dog_id)
+        for dog_id in data.keys():
+            data[dog_id] = {
+                **data[dog_id],
+                **await self._async_update_dog_data(dog_id, data[dog_id].get('Name'))
+            }
 
-    async def _async_update_dog_data(self, dog_id):
-        base_details = self.dogs[dog_id]
+        return data
 
+    async def _async_update_dog_data(self, dog_id, dog_name=None) -> dict:
         monitor_details = await self.api_client.async_get_monitor(dog_id)
         all_activity_days = await self.api_client.async_get_all_activity_days(dog_id)
 
@@ -85,10 +89,15 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         if (len(all_activity_days) > 0):
             activity_today = sorted(all_activity_days, key=lambda item: item.get('Date'), reverse=True)[0]
 
+        # The live sensors only ever expose the newest record, so a day completed
+        # by a later sync is fetched and discarded. Push every buffered day into
+        # long-term statistics instead, which corrects history retroactively.
+        try:
+            async_import_activity_history(self._hass, dog_name, all_activity_days)
+        except Exception:  # statistics must never break the data refresh
+            _LOGGER.exception('Failed to import daily activity statistics')
+
         return {
-            **base_details,
-            **{
-                'monitor_details': monitor_details,
-                'activity_today': activity_today,
-            }
+            'monitor_details': monitor_details,
+            'activity_today': activity_today,
         }

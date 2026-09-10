@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import logging
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 
 from homeassistant.components.select import (
     SelectEntity,
@@ -10,13 +10,13 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from propcache import cached_property
 
 from .api import PitPatApiClient
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
     PHONE_HOME_CADENCE_MAP,
+    Device,
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
@@ -30,7 +30,9 @@ def _get_phone_home_cadence_raw(entity: PitPatDogEntity) -> str | None:
 def _get_phone_home_cadence(entity: PitPatDogEntity) -> str | None:
     raw_value = _get_phone_home_cadence_raw(entity)
     if raw_value == None:
-        _LOGGER.error('No cadence available.')
+        # Activity monitors do not report a cadence, so this is expected rather
+        # than exceptional on those devices.
+        _LOGGER.debug('No cadence available.')
         return None
 
     option_value = PHONE_HOME_CADENCE_MAP.get(raw_value)
@@ -47,6 +49,9 @@ class PitPatSelectEntityDescription(SelectEntityDescription):
     attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
     update_fn: Callable[[PitPatApiClient, PitPatDogEntity, str], None]
 
+    # The devices the sensor is applicable to. If not provided, sensor will be created for all devices.
+    applicable_devices: List[Device] = None
+
 ENTITY_DESCRIPTIONS = [
     PitPatSelectEntityDescription(
         key='phone_home_cadence',
@@ -59,6 +64,7 @@ ENTITY_DESCRIPTIONS = [
             'raw_value': _get_phone_home_cadence_raw(entity)
         },
         update_fn=lambda api, entity, option: api.async_update_phone_home_cadence(entity.dog_id, option),
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2]
     )
 ]
 
@@ -67,25 +73,24 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     coordinator: PitPatDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id][DATA_KEY_COORDINATOR]
     sensors = []
 
-    for dog_id in coordinator.dogs.keys():
+    for dog_id in coordinator.data.keys():
+        device = Device.from_model(coordinator.data.get(dog_id, {}).get('Monitor', {}).get('Model'))
         for description in ENTITY_DESCRIPTIONS:
-            sensors.append(PitPatSelectEntity(coordinator, dog_id, description))
+            if not description.applicable_devices or device == Device.Unknown or device in description.applicable_devices:
+                sensors.append(PitPatSelectEntity(coordinator, dog_id, description))
 
     async_add_entities(sensors, True)
 
-class PitPatSelectEntity(PitPatDogEntity, SelectEntity):
-
-    _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
-
-    @property
-    def description(self) -> PitPatSelectEntityDescription:
-        return self.entity_description
+class PitPatSelectEntity(PitPatDogEntity[PitPatSelectEntityDescription], SelectEntity):
 
     @property
     def current_option(self) -> str | None:
         """Return the selected entity option to represent the entity state."""
         try:
-            return str(self.description.current_option_fn(self))
+            value = self.entity_description.current_option_fn(self)
+            # str(None) is "None", which is not a valid option, so Home Assistant
+            # raises every time the state is written.
+            return None if value is None else str(value)
         except Exception as e:
             raise ValueError(f"Unable to get value for {self.entity_description.key} select entity for dog id {self.dog_id}") from e
 
@@ -93,15 +98,15 @@ class PitPatSelectEntity(PitPatDogEntity, SelectEntity):
     def extra_state_attributes(self) -> Dict[str, Any] | None:
         try:
             attributes = super().extra_state_attributes
-            if self.description.attributes_fn:
-                attributes = {**attributes, **self.description.attributes_fn(self)}
+            if self.entity_description.attributes_fn:
+                attributes = {**attributes, **self.entity_description.attributes_fn(self)}
             return attributes
         except Exception as e:
             raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self.dog_id}") from e
 
     async def async_select_option(self, option: str):
         try:
-            await self.description.update_fn(self.coordinator.api_client, self, option)
+            await self.entity_description.update_fn(self.coordinator.api_client, self, option)
             await self.coordinator.async_request_refresh()
         except Exception as err:
             raise HomeAssistantError(f'Failed to update phone home cadence.') from err

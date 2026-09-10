@@ -1,11 +1,14 @@
 from dataclasses import dataclass
-from typing import Any, Callable, Dict
+from datetime import datetime
+import logging
+from typing import Any, Callable, Dict, List
 
 import dateutil
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     EntityCategory,
+    UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfLength,
     UnitOfMass,
@@ -22,10 +25,24 @@ from homeassistant.components.sensor import (
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
+    Device,
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
+from .typeutils import to_nullable_int, to_nullable_datetime
 
+
+def _battery_level(entity: PitPatDogEntity):
+    # This needs to be None-aware to prevent errors if the value is missing
+    battery_info = entity.data_monitor.get('BatteryInfo') or {}
+    value = battery_info.get('Value') or {}
+    fraction = value.get('BatteryLevelFraction')
+    return None if fraction is None else fraction * 100
+
+def _battery_voltage(entity: PitPatDogEntity):
+    battery_info = entity.data_monitor.get('BatteryVoltage') or {}
+    value = battery_info.get('Value') or {}
+    return value.get('Millivolts')
 
 def _get_tracking_mode(entity: PitPatDogEntity):
     reason_id = entity.data_monitor.get('LiveTrackingReason', 0)
@@ -49,10 +66,29 @@ def _get_tracking_status(entity: PitPatDogEntity):
     else:
         return 'unknown'
 
+def _get_contact_timing(entity: PitPatDogEntity, key: str) -> datetime | None:
+    raw_value = entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get(key)
+    return to_nullable_datetime(raw_value)
+
+def _get_signal_strength(entity: PitPatDogEntity):
+    raw_value = entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality')
+    return None if raw_value is None else (raw_value * 20)
+
+def _get_user_goal_progress(entity: PitPatDogEntity):
+    activeness = entity.data_dog.get('activity_today', {}).get('Activeness', 0)
+    user_goal = entity.data_dog.get('activity_today', {}).get('UserGoal', 0)
+    if activeness is None or user_goal is None:
+        return None
+    return (activeness / user_goal) * 100
+
+
 @dataclass(frozen=True, kw_only=True)
 class PitPatSensorEntityDescription(SensorEntityDescription):
     value_fn: Callable[[PitPatDogEntity], str | int | float | None]
     attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
+
+    # The devices the sensor is applicable to. If not provided, sensor will be created for all devices.
+    applicable_devices: List[Device] = None
 
 DOG_ENTITY_DESCRIPTIONS = [
     PitPatSensorEntityDescription(
@@ -78,7 +114,18 @@ DOG_ENTITY_DESCRIPTIONS = [
         translation_key="date_of_birth",
         icon="mdi:calendar",
         device_class=SensorDeviceClass.DATE,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_dog.get('BirthDate')).date(),
+        value_fn=lambda entity: to_nullable_datetime(entity.data_dog.get('BirthDate')).date(),
+    ),
+    PitPatSensorEntityDescription(
+        key="battery_voltage",
+        translation_key="battery_voltage",
+        device_class=SensorDeviceClass.VOLTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        native_unit_of_measurement=UnitOfElectricPotential.MILLIVOLT,
+        suggested_display_precision=0,
+        value_fn=lambda entity: _battery_voltage(entity),
+        applicable_devices=[Device.BluetoothActivityMonitor],
     ),
     PitPatSensorEntityDescription(
         key="battery_level",
@@ -88,7 +135,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: entity.data_monitor.get('BatteryInfo', {}).get('Value', {}).get('BatteryLevelFraction') * 100,
+        value_fn=lambda entity: _battery_level(entity),
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="network",
@@ -96,6 +144,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon='mdi:radio-tower',
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('NetworkOperator', {}).get('Value'),
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="signal_strength",
@@ -105,7 +154,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality') * 20,
+        value_fn=_get_signal_strength,
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="last_message_sent",
@@ -113,7 +163,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-arrow-right-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageSentAt')),
+        value_fn=lambda entity: _get_contact_timing(entity, 'LastMessageSentAt'),
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="last_message_received",
@@ -121,7 +172,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-arrow-left-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')),
+        value_fn=lambda entity: _get_contact_timing(entity, 'LastMessageReceivedAt'),
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="next_message_expected",
@@ -129,7 +181,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-fast-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')),
+        value_fn=lambda entity: _get_contact_timing(entity, 'NextMessageExpectedAt'),
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="activity_pottering",
@@ -222,19 +275,21 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: (entity.data_dog.get('activity_today', {}).get('Activeness', 0) / entity.data_dog.get('activity_today', {}).get('UserGoal', 0)) * 100,
+        value_fn=_get_user_goal_progress,
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_mode",
         translation_key="live_tracking_mode",
         icon="mdi:map-marker-radius",
-        value_fn=lambda entity: _get_tracking_mode(entity),
+        value_fn=_get_tracking_mode,
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_status",
         translation_key="live_tracking_status",
         icon="mdi:satellite-variant",
-        value_fn=lambda entity: _get_tracking_status(entity),
+        value_fn=_get_tracking_status,
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
 ]
 
@@ -243,33 +298,29 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     coordinator: PitPatDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id][DATA_KEY_COORDINATOR]
     sensors = []
 
-    for dog_id in coordinator.dogs.keys():
+    for dog_id in coordinator.data.keys():
+        device = Device.from_model(coordinator.data.get(dog_id, {}).get('Monitor', {}).get('Model'))
         for description in DOG_ENTITY_DESCRIPTIONS:
-            sensors.append(PitPatDogSensorEntity(coordinator, dog_id, description))
+            if not description.applicable_devices or device == Device.Unknown or device in description.applicable_devices:
+                sensors.append(PitPatDogSensorEntity(coordinator, dog_id, description))
 
     async_add_entities(sensors, True)
 
-class PitPatDogSensorEntity(PitPatDogEntity, SensorEntity):
-
-    _attr_has_entity_name = True # Required for reading translation_key from EntityDescription
-
-    @property
-    def description(self) -> PitPatSensorEntityDescription:
-        return self.entity_description
+class PitPatDogSensorEntity(PitPatDogEntity[PitPatSensorEntityDescription], SensorEntity):
 
     @property
     def native_value(self):
         try:
-            return self.description.value_fn(self)
+            return self.entity_description.value_fn(self)
         except Exception as e:
-            raise ValueError(f"Unable to get value for {self.entity_description.key} sensor entity for dog id {self._dog_id}") from e
+            raise ValueError(f"Unable to get value for {self.entity_description.key} sensor entity for dog id {self.dog_id}") from e
 
     @property
     def extra_state_attributes(self) -> Dict[str, Any] | None:
         try:
             attributes = super().extra_state_attributes
-            if self.description.attributes_fn:
-                attributes = {**attributes, **self.description.attributes_fn(self)}
+            if self.entity_description.attributes_fn:
+                attributes = {**attributes, **self.entity_description.attributes_fn(self)}
             return attributes
         except Exception as e:
-            raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self._dog_id}") from e
+            raise ValueError(f"Unable to get attributes for {self.entity_description.key} sensor entity for dog id {self.dog_id}") from e

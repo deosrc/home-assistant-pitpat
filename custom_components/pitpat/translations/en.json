@@ -44,6 +44,9 @@
       "date_of_birth": {
         "name": "Date of Birth"
       },
+      "battery_voltage": {
+        "name": "Battery Voltage"
+      },
       "battery_level": {
         "name": "Battery Level"
       },

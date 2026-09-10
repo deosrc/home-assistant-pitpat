@@ -1,7 +1,7 @@
 #!/bin/bash
 
 mkdir .data
-chown -R 1000:1000 .data
+chown -R $(id -u):$(id -u) .data
 
 touch .data/scripts.yaml
 touch .data/automations.yaml
@@ -15,6 +15,6 @@ docker run --rm \
     -v $(pwd)/debug_configuration.yaml:/config/configuration.yaml:ro \
     -v $(pwd)/custom_components:/config/custom_components:ro \
     -v $(pwd)/blueprints:/config/blueprints \
-    --user 1000:1000 \
+    --user $(id -u):$(id -g) \
     --name homeassistant \
     homeassistant/home-assistant:2026.1.3
