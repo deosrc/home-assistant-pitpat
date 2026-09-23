@@ -8,10 +8,12 @@ DOMAIN = "pitpat"
 MANUFACTURER = "PitPat"
 
 OPTIONS_KEY_UPDATE_INTERVAL = "update_interval"
+OPTIONS_KEY_SIGNAL_LOST_AFTER_OVERDUE = "signal_lost_after_overdue"
 
 DATA_KEY_COORDINATOR = "coordinator"
 
 UPDATE_INTERVAL_DEFAULT = 5
+SIGNAL_LOST_AFTER_OVERDUE_DEFAULT = 30
 
 # Device enum member names are based on current knowledge and may require
 # renaming as new hardware revisions are discovered.
