@@ -69,6 +69,12 @@ def _get_tracking_status(entity: PitPatDogEntity):
     else:
         return 'unknown'
 
+def _activity_today(entity: PitPatDogEntity) -> dict:
+    return entity.data_dog.get('activity_today') or {}
+
+def _activity_available(entity: PitPatDogEntity) -> bool:
+    return entity.data_dog.get('activity_today') is not None
+
 def _parse_london_time(value: str) -> datetime | None:
     try:
         parsed = dateutil.parser.parse(value)
@@ -114,7 +120,7 @@ def _get_user_goal_progress(entity: PitPatDogEntity):
 class PitPatSensorEntityDescription(SensorEntityDescription):
     value_fn: Callable[[PitPatDogEntity], str | int | float | None]
     attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
-    available_fn: Callable[[PitPatDogEntity], bool] = None
+    available_fn: Callable[[PitPatDogEntity], bool] = lambda entity: True
 
     # The devices the sensor is applicable to. If not provided, sensor will be created for all devices.
     applicable_devices: List[Device] = None
@@ -231,7 +237,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
         suggested_unit_of_measurement=UnitOfTime.HOURS,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalPotteringMinutes', 0),
+        value_fn=lambda entity: _activity_today(entity).get('TotalPotteringMinutes', 0),
+        available_fn=_activity_available,
     ),
     PitPatSensorEntityDescription(
         key="activity_running",
@@ -240,7 +247,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalRunMinutes', 0),
+        value_fn=lambda entity: _activity_today(entity).get('TotalRunMinutes', 0),
+        available_fn=_activity_available,
     ),
     PitPatSensorEntityDescription(
         key="activity_walking",
@@ -249,7 +257,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalWalkMinutes', 0),
+        value_fn=lambda entity: _activity_today(entity).get('TotalWalkMinutes', 0),
+        available_fn=_activity_available,
     ),
     PitPatSensorEntityDescription(
         key="activity_playing",
@@ -258,7 +267,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalPlayMinutes', 0),
+        value_fn=lambda entity: _activity_today(entity).get('TotalPlayMinutes', 0),
+        available_fn=_activity_available,
     ),
     PitPatSensorEntityDescription(
         key="activity_resting",
@@ -268,7 +278,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
         suggested_unit_of_measurement=UnitOfTime.HOURS,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalRestMinutes', 0),
+        value_fn=lambda entity: _activity_today(entity).get('TotalRestMinutes', 0),
+        available_fn=_activity_available,
     ),
     PitPatSensorEntityDescription(
         key="activity_total_exercising",
@@ -277,7 +288,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('Activeness', 0),
+        value_fn=lambda entity: _activity_today(entity).get('Activeness', 0),
+        available_fn=_activity_available,
     ),
     PitPatSensorEntityDescription(
         key="activity_steps",
@@ -285,7 +297,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:paw",
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement="steps",
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalSteps', 0),
+        value_fn=lambda entity: _activity_today(entity).get('TotalSteps', 0),
+        available_fn=_activity_available,
     ),
     PitPatSensorEntityDescription(
         key="activity_distance",
@@ -296,7 +309,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         native_unit_of_measurement=UnitOfLength.METERS,
         suggested_unit_of_measurement=UnitOfLength.KILOMETERS,
         suggested_display_precision=0,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalDistance', 0),
+        value_fn=lambda entity: _activity_today(entity).get('TotalDistance', 0),
+        available_fn=_activity_available,
     ),
     PitPatSensorEntityDescription(
         key="activity_calories",
@@ -305,7 +319,8 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.KILO_CALORIE,
-        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('TotalCalories', 0),
+        value_fn=lambda entity: _activity_today(entity).get('TotalCalories', 0),
+        available_fn=_activity_available,
     ),
     PitPatSensorEntityDescription(
         key="user_goal_progress",
@@ -315,6 +330,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
         value_fn=_get_user_goal_progress,
+        available_fn=_activity_available,
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_mode",
@@ -349,9 +365,10 @@ class PitPatDogSensorEntity(PitPatDogEntity[PitPatSensorEntityDescription], Sens
 
     @property
     def available(self) -> bool:
-        if self.entity_description.available_fn:
-            return self.entity_description.available_fn(self)
-        return super().available
+        try:
+            return super().available and self.entity_description.available_fn(self)
+        except Exception as e:
+            raise ValueError(f"Unable to get availability value for {self.entity_description.key} sensor entity for dog id {self.dog_id}") from e
 
     @property
     def native_value(self):
