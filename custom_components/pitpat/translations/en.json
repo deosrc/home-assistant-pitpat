@@ -25,7 +25,8 @@
     "step": {
       "init": {
         "data": {
-          "update_interval": "Update Interval (Minutes)"
+          "update_interval": "Update Interval (Minutes)",
+          "signal_lost_after_overdue": "Assume signal is lost after message is overdue by (Minutes)"
         }
       }
     }

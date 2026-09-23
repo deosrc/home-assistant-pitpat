@@ -18,9 +18,6 @@ from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
 
 
-def _activity_today(entity: PitPatDogEntity) -> dict:
-    return entity.data_dog.get('activity_today') or {}
-
 def _activity_available(entity: PitPatDogEntity) -> bool:
     return entity.data_dog.get('activity_today') is not None
 
@@ -38,19 +35,19 @@ DOG_ENTITY_DESCRIPTIONS = [
         key="live_tracking_active",
         translation_key="live_tracking_active",
         value_fn=lambda entity: entity.data_monitor.get('LiveTrackingReason', 0) != 0,
-        applicable_devices=[Device.GpsTracker],
+        applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatBinarySensorEntityDescription(
         key="charging_status",
         translation_key="charging_status",
         device_class=BinarySensorDeviceClass.BATTERY_CHARGING,
-        value_fn=lambda entity: bool(entity.data_monitor.get('BatteryInfo', {}).get('Value', {}).get('IsCharging', False)),
+        value_fn=lambda entity: entity.data_monitor.get('BatteryInfo', {}).get('Value', {}).get('IsCharging', False),
     ),
     PitPatBinarySensorEntityDescription(
         key='user_goal_achieved',
         translation_key='user_goal_achieved',
         icon="mdi:flag-checkered",
-        value_fn=lambda entity: bool(_activity_today(entity).get('UserGoalAchieved', False)),
+        value_fn=lambda entity: entity.data_dog.get('activity_today', {}).get('UserGoalAchieved', False),
         available_fn=_activity_available,
     )
 ]
