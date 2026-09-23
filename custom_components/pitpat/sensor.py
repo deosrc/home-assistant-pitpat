@@ -27,8 +27,8 @@ from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
     Device,
-    OPTIONS_KEY_SIGNAL_GRACE_PERIOD,
-    SIGNAL_GRACE_PERIOD_DEFAULT,
+    OPTIONS_KEY_SIGNAL_LOST_AFTER_OVERDUE,
+    SIGNAL_LOST_AFTER_OVERDUE_DEFAULT,
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
@@ -83,16 +83,16 @@ def _get_contact_timing(entity: PitPatDogEntity, key: str) -> datetime | None:
     return to_nullable_datetime(raw_value)
 
 def _is_tracker_overdue(entity: PitPatDogEntity):
-    """Return True if the tracker is overdue phoning home beyond the configured grace period."""
+    """Return True if the tracker is overdue phoning home beyond the configured timeout."""
     expected_at_value = entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')
     if not expected_at_value:
         return False
     expected_at = _parse_london_time(expected_at_value)
     if not expected_at:
         return False
-    grace_period_minutes = entity.coordinator.config_entry.options.get(
-        OPTIONS_KEY_SIGNAL_GRACE_PERIOD, SIGNAL_GRACE_PERIOD_DEFAULT)
-    return dt_util.now() > expected_at + timedelta(minutes=grace_period_minutes)
+    overdue_minutes = entity.coordinator.config_entry.options.get(
+        OPTIONS_KEY_SIGNAL_LOST_AFTER_OVERDUE, SIGNAL_LOST_AFTER_OVERDUE_DEFAULT)
+    return dt_util.now() > expected_at + timedelta(minutes=overdue_minutes)
 
 def _get_signal_strength(entity: PitPatDogEntity):
     """Return the signal strength, or 0 if the tracker is overdue phoning home."""
