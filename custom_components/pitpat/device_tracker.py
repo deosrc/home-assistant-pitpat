@@ -16,6 +16,7 @@ from .const import (
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
+from .typeutils import to_nullable_datetime, to_nullable_float
 
 
 def _get_monitor_position(entity: PitPatDogEntity) -> dict:
@@ -40,11 +41,11 @@ ENTITY_DESCRIPTIONS = [
         key='last_known_position',
         translation_key='last_known_position',
         icon="mdi:dog",
-        latitude_fn=lambda entity: float(_get_monitor_position(entity).get('Latitude')),
-        longitude_fn=lambda entity: float(_get_monitor_position(entity).get('Longitude')),
-        accuracy_fn=lambda entity: float(_get_monitor_position(entity).get('Accuracy', {}).get('Metres')),
+        latitude_fn=lambda entity: to_nullable_float(_get_monitor_position(entity).get('Latitude')),
+        longitude_fn=lambda entity: to_nullable_float(_get_monitor_position(entity).get('Longitude')),
+        accuracy_fn=lambda entity: to_nullable_float(_get_monitor_position(entity).get('Accuracy', {}).get('Metres')),
         attributes_fn=lambda entity: {
-            "last_updated": dateutil.parser.parse(_get_monitor_position(entity).get('DataTime'))
+            "last_updated": to_nullable_datetime(_get_monitor_position(entity).get('DataTime'))
         },
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
@@ -53,9 +54,9 @@ ENTITY_DESCRIPTIONS = [
         translation_key='live_position',
         icon="mdi:dog",
         available_fn=lambda data: _is_tracking_live(data),
-        latitude_fn=lambda data: float(_get_monitor_position(data).get('Latitude')),
-        longitude_fn=lambda data: float(_get_monitor_position(data).get('Longitude')),
-        accuracy_fn=lambda data: float(_get_monitor_position(data).get('Accuracy', {}).get('Metres')),
+        latitude_fn=lambda data: to_nullable_float(_get_monitor_position(data).get('Latitude')),
+        longitude_fn=lambda data: to_nullable_float(_get_monitor_position(data).get('Longitude')),
+        accuracy_fn=lambda data: to_nullable_float(_get_monitor_position(data).get('Accuracy', {}).get('Metres')),
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     )
 ]

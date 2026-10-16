@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List
+from zoneinfo import ZoneInfo
 
 import dateutil
 from homeassistant.core import HomeAssistant
@@ -19,14 +21,18 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
+from homeassistant.util import dt as dt_util
 
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
     Device,
+    OPTIONS_KEY_SIGNAL_LOST_AFTER_OVERDUE,
+    SIGNAL_LOST_AFTER_OVERDUE_DEFAULT,
 )
 from .coordinator import PitPatDataUpdateCoordinator
 from .entity import PitPatDogEntity
+from .typeutils import to_nullable_datetime
 
 
 def _battery_level(entity: PitPatDogEntity):
@@ -35,7 +41,6 @@ def _battery_level(entity: PitPatDogEntity):
     value = battery_info.get('Value') or {}
     fraction = value.get('BatteryLevelFraction')
     return None if fraction is None else fraction * 100
-
 
 def _battery_voltage(entity: PitPatDogEntity):
     battery_info = entity.data_monitor.get('BatteryVoltage') or {}
@@ -64,10 +69,52 @@ def _get_tracking_status(entity: PitPatDogEntity):
     else:
         return 'unknown'
 
+def _parse_london_time(value: str) -> datetime | None:
+    try:
+        parsed = dateutil.parser.parse(value)
+    except (ValueError, OverflowError, TypeError):
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=ZoneInfo('Europe/London'))
+    return parsed
+
+def _get_contact_timing(entity: PitPatDogEntity, key: str) -> datetime | None:
+    raw_value = entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get(key)
+    return to_nullable_datetime(raw_value)
+
+def _is_tracker_overdue(entity: PitPatDogEntity):
+    """Return True if the tracker is overdue phoning home beyond the configured timeout."""
+    expected_at_value = entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')
+    if not expected_at_value:
+        return False
+    expected_at = _parse_london_time(expected_at_value)
+    if not expected_at:
+        return False
+    overdue_minutes = entity.coordinator.config_entry.options.get(
+        OPTIONS_KEY_SIGNAL_LOST_AFTER_OVERDUE, SIGNAL_LOST_AFTER_OVERDUE_DEFAULT)
+    return dt_util.now() > expected_at + timedelta(minutes=overdue_minutes)
+
+def _get_signal_strength(entity: PitPatDogEntity):
+    """Return the signal strength, or 0 if the tracker is overdue phoning home."""
+    quality = entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality')
+    if quality is None:
+        return None
+    if _is_tracker_overdue(entity):
+        return 0
+    return quality * 20
+
+def _get_user_goal_progress(entity: PitPatDogEntity):
+    activeness = entity.data_dog.get('activity_today', {}).get('Activeness', 0)
+    user_goal = entity.data_dog.get('activity_today', {}).get('UserGoal', 0)
+    if activeness is None or user_goal is None:
+        return None
+    return (activeness / user_goal) * 100
+
 @dataclass(frozen=True, kw_only=True)
 class PitPatSensorEntityDescription(SensorEntityDescription):
     value_fn: Callable[[PitPatDogEntity], str | int | float | None]
     attributes_fn: Callable[[PitPatDogEntity], dict | None] = None
+    available_fn: Callable[[PitPatDogEntity], bool] = None
 
     # The devices the sensor is applicable to. If not provided, sensor will be created for all devices.
     applicable_devices: List[Device] = None
@@ -96,7 +143,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         translation_key="date_of_birth",
         icon="mdi:calendar",
         device_class=SensorDeviceClass.DATE,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_dog.get('BirthDate')).date(),
+        value_fn=lambda entity: to_nullable_datetime(entity.data_dog.get('BirthDate')).date(),
     ),
     PitPatSensorEntityDescription(
         key="weight",
@@ -135,6 +182,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon='mdi:radio-tower',
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('NetworkOperator', {}).get('Value'),
+        available_fn=lambda entity: not _is_tracker_overdue(entity),
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
@@ -145,7 +193,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         entity_category=EntityCategory.DIAGNOSTIC,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: entity.data_monitor.get('Network', {}).get('Value', {}).get('Quality') * 20,
+        value_fn=_get_signal_strength,
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
@@ -154,7 +202,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-arrow-right-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageSentAt')),
+        value_fn=lambda entity: _get_contact_timing(entity, 'LastMessageSentAt'),
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
@@ -163,7 +211,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-arrow-left-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('LastMessageReceivedAt')),
+        value_fn=lambda entity: _get_contact_timing(entity, 'LastMessageReceivedAt'),
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
@@ -172,7 +220,7 @@ DOG_ENTITY_DESCRIPTIONS = [
         icon="mdi:email-fast-outline",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda entity: dateutil.parser.parse(entity.data_monitor.get('ContactTimings', {}).get('Value', {}).get('NextMessageExpectedAt')),
+        value_fn=lambda entity: _get_contact_timing(entity, 'NextMessageExpectedAt'),
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
@@ -266,20 +314,20 @@ DOG_ENTITY_DESCRIPTIONS = [
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=0,
-        value_fn=lambda entity: (entity.data_dog.get('activity_today', {}).get('Activeness', 0) / entity.data_dog.get('activity_today', {}).get('UserGoal', 0)) * 100,
+        value_fn=_get_user_goal_progress,
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_mode",
         translation_key="live_tracking_mode",
         icon="mdi:map-marker-radius",
-        value_fn=lambda entity: _get_tracking_mode(entity),
+        value_fn=_get_tracking_mode,
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
     PitPatSensorEntityDescription(
         key="live_tracking_status",
         translation_key="live_tracking_status",
         icon="mdi:satellite-variant",
-        value_fn=lambda entity: _get_tracking_status(entity),
+        value_fn=_get_tracking_status,
         applicable_devices=[Device.GpsTrackerV1, Device.GpsTrackerV2],
     ),
 ]
@@ -298,6 +346,12 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     async_add_entities(sensors, True)
 
 class PitPatDogSensorEntity(PitPatDogEntity[PitPatSensorEntityDescription], SensorEntity):
+
+    @property
+    def available(self) -> bool:
+        if self.entity_description.available_fn:
+            return self.entity_description.available_fn(self)
+        return super().available
 
     @property
     def native_value(self):
