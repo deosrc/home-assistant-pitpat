@@ -8,7 +8,9 @@ from homeassistant.config_entries import (
 
 from .const import (
     OPTIONS_KEY_UPDATE_INTERVAL,
+    OPTIONS_KEY_SIGNAL_LOST_AFTER_OVERDUE,
     UPDATE_INTERVAL_DEFAULT,
+    SIGNAL_LOST_AFTER_OVERDUE_DEFAULT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -16,6 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 OPTIONS_SCHEMA = vol.Schema(
     {
         vol.Required(OPTIONS_KEY_UPDATE_INTERVAL, default=UPDATE_INTERVAL_DEFAULT): vol.All(vol.Coerce(int), vol.Range(min=1)),
+        vol.Required(OPTIONS_KEY_SIGNAL_LOST_AFTER_OVERDUE, default=SIGNAL_LOST_AFTER_OVERDUE_DEFAULT): vol.All(vol.Coerce(int), vol.Range(min=1)),
     }
 )
 

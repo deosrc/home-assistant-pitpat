@@ -25,7 +25,6 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
     def __init__(self, hass: HomeAssistant, update_interval: int, config_entry: ConfigEntry):
         """Initialize the coordinator and set up the Controller object."""
         self._hass = hass
-        self._config_entry = config_entry
 
         self._available = True
         self.api_client: PitPatApiClient | None = None
@@ -33,6 +32,7 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
         super().__init__(
             hass,
             _LOGGER,
+            config_entry=config_entry,
             name=DOMAIN,
             update_interval=timedelta(minutes=update_interval),
         )
@@ -49,7 +49,7 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
         _LOGGER.info('Preparing new API client from refresh token.')
         try:
             session = async_create_clientsession(self._hass)
-            tokens = await PitPatApiClient.async_authenticate_from_refresh_token(session, self._config_entry.data.get('refresh_token'))
+            tokens = await PitPatApiClient.async_authenticate_from_refresh_token(session, self.config_entry.data.get('refresh_token'))
             self.api_client = PitPatApiClient(session, tokens)
         except InvalidCredentialsError as err:
             raise ConfigEntryAuthFailed() from err
