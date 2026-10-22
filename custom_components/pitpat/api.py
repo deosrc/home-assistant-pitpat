@@ -247,6 +247,38 @@ class PitPatApiClient():
         result.raise_for_status()
         _LOGGER.info('Phone home cadence updated to "%s"', value)
 
+    async def async_set_weight(self, dog_id: str, weight_kg: float) -> None:
+        """
+        Update the weight for a dog.
+
+        :param dog_id: The Id for the dog the weight is being updated for.
+        :param weight_kg: The weight of the dog in kg.
+        """
+        _LOGGER.debug('Updating weight for %s to %s kg', dog_id, weight_kg)
+
+        await self.async_ensure_user_id_present()
+        dogs = await self.async_get_dogs()
+
+        dog = next((d for d in dogs if d.get('Id') == dog_id), None)
+        if dog is None:
+            raise ValueError(f'No dog found with Id "{dog_id}"')
+
+        # Weight is always sent in kg as this integration always reports it in
+        # kg. The weight unit is set to Kilogram so the value is stored as-is.
+        dog['Weight'] = weight_kg
+        dog['WeightUnit'] = 0  # Kilogram
+
+        # As in the app, the whole dog object is sent and the server returns the
+        # updated dog. The freshly fetched copy is used to avoid overwriting
+        # changes made elsewhere since the last refresh.
+        result = await self._session.put(
+            f'{PitPatApiClient.__HOST_API}/api/Users/{self.__user_id}/Dogs/{dog_id}',
+            json=dog,
+            headers=self.default_headers)
+
+        result.raise_for_status()
+        _LOGGER.info('Updated weight for %s to %s kg', dog_id, weight_kg)
+
     async def async_ensure_user_id_present(self) -> bool:
         """
         Ensures the current user Id is configured on the API client.
