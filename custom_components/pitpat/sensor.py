@@ -110,9 +110,10 @@ def _get_signal_strength(entity: PitPatDogEntity):
     return quality * 20
 
 def _get_user_goal_progress(entity: PitPatDogEntity):
-    activeness = _activity_today(entity).get('Activeness', 0)
-    user_goal = _activity_today(entity).get('UserGoal', 0)
-    if activeness is None or user_goal is None:
+    activity = _activity_today(entity)
+    activeness = activity.get('Activeness', 0)
+    user_goal = activity.get('UserGoal', 0)
+    if activeness is None or not user_goal:
         return None
     return (activeness / user_goal) * 100
 
