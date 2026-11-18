@@ -17,4 +17,4 @@ docker run --rm \
     -v $(pwd)/blueprints:/config/blueprints \
     --user $(id -u):$(id -g) \
     --name homeassistant \
-    homeassistant/home-assistant:2026.1.3
+    homeassistant/home-assistant:2026.11.2
