@@ -140,6 +140,11 @@
       "phone_home_cadence": {
         "name": "Phone Home Cadence"
       }
+    },
+    "number": {
+      "weight": {
+        "name": "Weight"
+      }
     }
   }
 }

@@ -319,6 +319,42 @@
       "responseMode": null,
       "streamingMode": null,
       "streamingInterval": 0
+    },
+    {
+      "uuid": "156c1e18-e7df-4f43-a7df-b561ec54baea",
+      "type": "http",
+      "documentation": "Updates a dog. The whole dog object is sent (as the app does) and the updated dog is returned.",
+      "method": "put",
+      "endpoint": "api/Users/:userId/Dogs/:dogId",
+      "responses": [
+        {
+          "uuid": "1cd9f7b7-760c-4b6a-ba26-0ae2308854ec",
+          "body": "{{ body }}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Updated dog",
+          "headers": [
+            {
+              "key": "content-type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     }
   ],
   "rootChildren": [
@@ -333,6 +369,10 @@
     {
       "type": "route",
       "uuid": "9fff7c4b-4fac-4f4d-a9a5-61d0e350df96"
+    },
+    {
+      "type": "route",
+      "uuid": "156c1e18-e7df-4f43-a7df-b561ec54baea"
     }
   ],
   "proxyMode": true,
