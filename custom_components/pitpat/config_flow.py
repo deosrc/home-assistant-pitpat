@@ -8,7 +8,6 @@ from homeassistant.config_entries import (
     ConfigFlow,
     ConfigFlowResult,
     ConfigEntry,
-    CONN_CLASS_CLOUD_POLL,
     SOURCE_REAUTH,
 )
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
@@ -48,7 +47,6 @@ class PitPatConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for the integration."""
 
     VERSION = 1
-    CONNECTION_CLASS = CONN_CLASS_CLOUD_POLL
 
     async def async_step_user(self, user_input=None) -> ConfigFlowResult:
         """Handle the initial step."""
