@@ -66,14 +66,24 @@ def _get_activity_today(all_activity_days: list | None, reference: datetime | No
 
     return most_recent
 
+def _is_tracking_active(data: TCoordinatorData | None) -> bool:
+    """Return whether live tracking is active for any dog."""
+    return any(
+        ((dog.get('monitor_details') or {}).get('LiveTrackingReason') or 0) != 0
+        for dog in (data or {}).values()
+    )
+
+
 class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
     """DataUpdateCoordinator to handle fetching data from PitPat."""
 
-    def __init__(self, hass: HomeAssistant, update_interval: int, config_entry: ConfigEntry):
+    def __init__(self, hass: HomeAssistant, update_interval: int, tracking_update_interval: int, config_entry: ConfigEntry):
         """Initialize the coordinator and set up the Controller object."""
         self._hass = hass
 
         self._available = True
+        self._normal_interval = timedelta(minutes=update_interval)
+        self._tracking_interval = timedelta(seconds=tracking_update_interval)
         self.api_client: PitPatApiClient | None = None
 
         super().__init__(
@@ -81,7 +91,18 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
             _LOGGER,
             config_entry=config_entry,
             name=DOMAIN,
-            update_interval=timedelta(minutes=update_interval),
+            update_interval=self._normal_interval,
+        )
+
+    def set_intervals(self, update_interval: int, tracking_update_interval: int) -> None:
+        """Update the configured intervals (minutes, seconds) and apply the right one."""
+        self._normal_interval = timedelta(minutes=update_interval)
+        self._tracking_interval = timedelta(seconds=tracking_update_interval)
+        self._apply_interval()
+
+    def _apply_interval(self) -> None:
+        self.update_interval = (
+            self._tracking_interval if _is_tracking_active(self.data) else self._normal_interval
         )
 
     async def _async_ensure_ready(self):
@@ -103,6 +124,15 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
 
     async def _async_update_data(self) -> TCoordinatorData:
         """Fetch data"""
+        data = await self._async_fetch_with_retry()
+        # Poll faster while tracking is active. The next refresh is scheduled
+        # after this returns, so it picks up the new interval.
+        self.update_interval = (
+            self._tracking_interval if _is_tracking_active(data) else self._normal_interval
+        )
+        return data
+
+    async def _async_fetch_with_retry(self) -> TCoordinatorData:
         try:
             return await self._async_refresh_data()
         except ConfigEntryAuthFailed as err:

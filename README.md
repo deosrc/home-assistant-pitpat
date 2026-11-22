@@ -35,14 +35,14 @@ If authentication fails later (e.g., password changed), Home Assistant will prom
 
 ## Options
 
-By default the integration polls for updates every 5 minutes. This can be increased in the options panel:
+By default the integration polls for updates every 5 minutes. While live tracking is active it polls every 60 seconds instead. Both can be changed in the options panel:
 
 1. Go to the integration page:
 
     [![Open your Home Assistant instance and show an integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=pitpat)
 
 1. Click the options cog for the entry.
-1. Adjust the poll interval as required and save.
+1. Adjust the poll interval and the tracking poll interval (seconds) as required and save.
 
 The new interval should take effect without needing to reload anything.
 

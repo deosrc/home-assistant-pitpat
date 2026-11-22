@@ -6,9 +6,17 @@ from homeassistant.config_entries import (
     OptionsFlow,
 )
 
+from homeassistant.helpers.selector import (
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
+)
+
 from .const import (
     OPTIONS_KEY_UPDATE_INTERVAL,
     OPTIONS_KEY_SIGNAL_LOST_AFTER_OVERDUE,
+    OPTIONS_KEY_TRACKING_UPDATE_INTERVAL,
+    TRACKING_UPDATE_INTERVAL_DEFAULT,
     UPDATE_INTERVAL_DEFAULT,
     SIGNAL_LOST_AFTER_OVERDUE_DEFAULT,
 )
@@ -18,6 +26,10 @@ _LOGGER = logging.getLogger(__name__)
 OPTIONS_SCHEMA = vol.Schema(
     {
         vol.Required(OPTIONS_KEY_UPDATE_INTERVAL, default=UPDATE_INTERVAL_DEFAULT): vol.All(vol.Coerce(int), vol.Range(min=1)),
+        vol.Required(OPTIONS_KEY_TRACKING_UPDATE_INTERVAL, default=TRACKING_UPDATE_INTERVAL_DEFAULT): vol.All(
+            NumberSelector(NumberSelectorConfig(min=30, step=10, mode=NumberSelectorMode.BOX, unit_of_measurement='s')),
+            vol.Coerce(int),
+        ),
         vol.Required(OPTIONS_KEY_SIGNAL_LOST_AFTER_OVERDUE, default=SIGNAL_LOST_AFTER_OVERDUE_DEFAULT): vol.All(vol.Coerce(int), vol.Range(min=1)),
     }
 )
