@@ -98,12 +98,20 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
         """Update the configured intervals (minutes, seconds) and apply the right one."""
         self._normal_interval = timedelta(minutes=update_interval)
         self._tracking_interval = timedelta(seconds=tracking_update_interval)
-        self._apply_interval()
+        self._apply_interval(self.data)
 
-    def _apply_interval(self) -> None:
-        self.update_interval = (
-            self._tracking_interval if _is_tracking_active(self.data) else self._normal_interval
-        )
+    def _apply_interval(self, data: TCoordinatorData | None) -> None:
+        """Pick the poll interval for the given data, logging when it changes."""
+        tracking = _is_tracking_active(data)
+        new_interval = self._tracking_interval if tracking else self._normal_interval
+        if new_interval != self.update_interval:
+            _LOGGER.info(
+                'Tracking %s: poll interval changed from %s to %s',
+                'active' if tracking else 'inactive',
+                self.update_interval,
+                new_interval,
+            )
+        self.update_interval = new_interval
 
     async def _async_ensure_ready(self):
         if not self.api_client:
@@ -127,9 +135,7 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
         data = await self._async_fetch_with_retry()
         # Poll faster while tracking is active. The next refresh is scheduled
         # after this returns, so it picks up the new interval.
-        self.update_interval = (
-            self._tracking_interval if _is_tracking_active(data) else self._normal_interval
-        )
+        self._apply_interval(data)
         return data
 
     async def _async_fetch_with_retry(self) -> TCoordinatorData:
