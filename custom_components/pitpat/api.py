@@ -90,10 +90,8 @@ class PitPatApiClient():
         _LOGGER.info('Received %i status code from auth request', result.status)
 
         response: Dict[str, Any] = await result.json()
-        _LOGGER.debug('Auth response: %s', response)
-
         if result.status == 400 and 'invalid_grant' == response.get('error'):
-            _LOGGER.warning('Auth request failed: %s', response)
+            _LOGGER.warning('Auth request failed: %s', response.get('error'))
             raise InvalidCredentialsError()
 
         result.raise_for_status()
@@ -287,10 +285,10 @@ class PitPatApiClient():
         :rtype: bool
         """
         if self.__user_id:
-            _LOGGER.debug('User Id is already known as %s', self.__user_id)
+            _LOGGER.debug('User Id is already known')
             return
 
         settings = await self.async_get_settings()
         self.__user_id = settings.get('UserId')
-        _LOGGER.info('User Id detected as %s', self.__user_id)
+        _LOGGER.debug('User Id detected')
         return bool(self.__user_id)
