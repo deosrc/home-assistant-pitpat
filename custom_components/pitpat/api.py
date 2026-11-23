@@ -4,6 +4,11 @@ import aiohttp
 
 _LOGGER = logging.getLogger(__name__)
 
+
+def _redact_id(value: str) -> str:
+    """Return only the last segment of a GUID, for safe use in logs."""
+    return str(value).rsplit('-', 1)[-1]
+
 class InvalidCredentialsError(Exception):
     """The operation failed due to invalid or expired credentials."""
     pass
@@ -252,7 +257,7 @@ class PitPatApiClient():
         :param dog_id: The Id for the dog the weight is being updated for.
         :param weight_kg: The weight of the dog in kg.
         """
-        _LOGGER.debug('Updating weight for %s to %s kg', dog_id, weight_kg)
+        _LOGGER.debug('Updating weight for %s to %s kg', _redact_id(dog_id), weight_kg)
 
         await self.async_ensure_user_id_present()
         dogs = await self.async_get_dogs()
@@ -275,7 +280,7 @@ class PitPatApiClient():
             headers=self.default_headers)
 
         result.raise_for_status()
-        _LOGGER.info('Updated weight for %s to %s kg', dog_id, weight_kg)
+        _LOGGER.info('Updated weight for %s to %s kg', _redact_id(dog_id), weight_kg)
 
     async def async_ensure_user_id_present(self) -> bool:
         """
