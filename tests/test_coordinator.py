@@ -35,6 +35,29 @@ class DayIsTodayUnitTests(unittest.TestCase):
         self.assertFalse(coordinator._day_is_today((today - timedelta(days=1)).isoformat()))
 
 
+class IsTrackingActiveUnitTests(unittest.TestCase):
+
+    @staticmethod
+    def _dog(reason):
+        return {'monitor_details': {'Value': {'Monitor': {'LiveTrackingReason': reason}}}}
+
+    def test_is_tracking_active(self):
+        inputs = [
+            (None, False),
+            ({}, False),
+            ({'a': {}}, False),
+            ({'a': {'monitor_details': None}}, False),
+            ({'a': {'monitor_details': {'LiveTrackingReason': 1}}}, False),
+            ({'a': self._dog(0)}, False),
+            ({'a': self._dog(1)}, True),
+            ({'a': self._dog(0), 'b': self._dog(2)}, True),
+        ]
+
+        for raw_input, expected in inputs:
+            with self.subTest(raw_input):
+                self.assertEqual(expected, coordinator._is_tracking_active(raw_input))
+
+
 class GetActivityTodayUnitTests(unittest.TestCase):
 
     def test_no_data(self):

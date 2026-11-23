@@ -8,11 +8,14 @@ DOMAIN = "pitpat"
 MANUFACTURER = "PitPat"
 
 OPTIONS_KEY_UPDATE_INTERVAL = "update_interval"
+OPTIONS_KEY_TRACKING_UPDATE_INTERVAL = "tracking_update_interval"
 OPTIONS_KEY_SIGNAL_LOST_AFTER_OVERDUE = "signal_lost_after_overdue"
 
 DATA_KEY_COORDINATOR = "coordinator"
 
 UPDATE_INTERVAL_DEFAULT = 5
+# Seconds. Used instead of the normal interval while live tracking is active.
+TRACKING_UPDATE_INTERVAL_DEFAULT = 60
 SIGNAL_LOST_AFTER_OVERDUE_DEFAULT = 30
 
 # Device enum member names are based on current knowledge and may require
