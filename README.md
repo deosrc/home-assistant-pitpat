@@ -4,7 +4,8 @@ This is a custom integration for Home Assistant to add support for the PitPat pe
 
 This is in no way endorsed or affiliated with PitPat.
 
-> :warning: This integration is experimental.
+> [!WARNING]
+> This integration is experimental.
 >
 > - Expect bugs caused by limited testing causing unreliable or incorrect data (I only have access to a single device of one type)
 > - Expect potentially breaking changes requiring you to re-write scripts and automations
