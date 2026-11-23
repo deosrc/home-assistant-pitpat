@@ -16,15 +16,10 @@ class InvalidCredentialsError(Exception):
 class PitPatApiClient():
     """API Client for PitPat pet trackers."""
 
-    __HOST_AUTH = 'http://192.168.2.193:5100'
-    __HOST_API = 'http://192.168.2.193:5101'
-    __HOST_ACTIVITY = 'http://192.168.2.193:5102'
-    __HOST_LOCATION = 'http://192.168.2.193:5103'
-
-    # __HOST_AUTH = 'https://auth.pitpat.com'
-    # __HOST_API = 'https://api.pitpat.com'
-    # __HOST_ACTIVITY = 'https://activity.pitpat.com'
-    # __HOST_LOCATION = 'https://location.pitpat.com'
+    __HOST_AUTH = 'https://auth.pitpat.com'
+    __HOST_API = 'https://api.pitpat.com'
+    __HOST_ACTIVITY = 'https://activity.pitpat.com'
+    __HOST_LOCATION = 'https://location.pitpat.com'
 
     @staticmethod
     async def async_authenticate_from_credentials(session: aiohttp.ClientSession, username: str, password: str) -> Dict[str, Any]:
