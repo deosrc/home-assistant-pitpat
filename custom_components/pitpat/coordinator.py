@@ -68,10 +68,11 @@ def _get_activity_today(all_activity_days: list | None, reference: datetime | No
 
 def _is_tracking_active(data: TCoordinatorData | None) -> bool:
     """Return whether live tracking is active for any dog."""
-    return any(
-        ((dog.get('monitor_details') or {}).get('LiveTrackingReason') or 0) != 0
-        for dog in (data or {}).values()
-    )
+    def reason(dog: dict) -> int:
+        monitor = ((dog.get('monitor_details') or {}).get('Value') or {}).get('Monitor') or {}
+        return monitor.get('LiveTrackingReason') or 0
+
+    return any(reason(dog) != 0 for dog in (data or {}).values())
 
 
 class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):

@@ -37,16 +37,20 @@ class DayIsTodayUnitTests(unittest.TestCase):
 
 class IsTrackingActiveUnitTests(unittest.TestCase):
 
+    @staticmethod
+    def _dog(reason):
+        return {'monitor_details': {'Value': {'Monitor': {'LiveTrackingReason': reason}}}}
+
     def test_is_tracking_active(self):
         inputs = [
             (None, False),
             ({}, False),
             ({'a': {}}, False),
             ({'a': {'monitor_details': None}}, False),
-            ({'a': {'monitor_details': {'LiveTrackingReason': 0}}}, False),
-            ({'a': {'monitor_details': {'LiveTrackingReason': 1}}}, True),
-            ({'a': {'monitor_details': {'LiveTrackingReason': 0}},
-              'b': {'monitor_details': {'LiveTrackingReason': 2}}}, True),
+            ({'a': {'monitor_details': {'LiveTrackingReason': 1}}}, False),
+            ({'a': self._dog(0)}, False),
+            ({'a': self._dog(1)}, True),
+            ({'a': self._dog(0), 'b': self._dog(2)}, True),
         ]
 
         for raw_input, expected in inputs:
