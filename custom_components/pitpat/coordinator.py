@@ -66,14 +66,25 @@ def _get_activity_today(all_activity_days: list | None, reference: datetime | No
 
     return most_recent
 
+def _is_tracking_active(data: TCoordinatorData | None) -> bool:
+    """Return whether live tracking is active for any dog."""
+    def reason(dog: dict) -> int:
+        monitor = ((dog.get('monitor_details') or {}).get('Value') or {}).get('Monitor') or {}
+        return monitor.get('LiveTrackingReason') or 0
+
+    return any(reason(dog) != 0 for dog in (data or {}).values())
+
+
 class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
     """DataUpdateCoordinator to handle fetching data from PitPat."""
 
-    def __init__(self, hass: HomeAssistant, update_interval: int, config_entry: ConfigEntry):
+    def __init__(self, hass: HomeAssistant, update_interval: int, tracking_update_interval: int, config_entry: ConfigEntry):
         """Initialize the coordinator and set up the Controller object."""
         self._hass = hass
 
         self._available = True
+        self._normal_interval = timedelta(minutes=update_interval)
+        self._tracking_interval = timedelta(seconds=tracking_update_interval)
         self.api_client: PitPatApiClient | None = None
 
         super().__init__(
@@ -81,8 +92,28 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
             _LOGGER,
             config_entry=config_entry,
             name=DOMAIN,
-            update_interval=timedelta(minutes=update_interval),
+            update_interval=self._normal_interval,
         )
+
+    def set_intervals(self, update_interval: int, tracking_update_interval: int) -> None:
+        """Update the configured intervals (minutes, seconds) and apply the right one."""
+        self._normal_interval = timedelta(minutes=update_interval)
+        self._tracking_interval = timedelta(seconds=tracking_update_interval)
+        self._apply_interval(self.data)
+
+    def _apply_interval(self, data: TCoordinatorData | None) -> None:
+        """Pick the poll interval for the given data, logging when it changes."""
+        tracking = _is_tracking_active(data)
+        new_interval = self._tracking_interval if tracking else self._normal_interval
+        if new_interval != self.update_interval:
+            _LOGGER.info(
+                'Tracking %s: poll interval changed from %s to %s',
+                'active' if tracking else 'inactive',
+                self.update_interval,
+                new_interval,
+            )
+        self.update_interval = new_interval
+        _LOGGER.debug('Next poll in %s', new_interval)
 
     async def _async_ensure_ready(self):
         if not self.api_client:
@@ -103,6 +134,13 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
 
     async def _async_update_data(self) -> TCoordinatorData:
         """Fetch data"""
+        data = await self._async_fetch_with_retry()
+        # Poll faster while tracking is active. The next refresh is scheduled
+        # after this returns, so it picks up the new interval.
+        self._apply_interval(data)
+        return data
+
+    async def _async_fetch_with_retry(self) -> TCoordinatorData:
         try:
             return await self._async_refresh_data()
         except ConfigEntryAuthFailed as err:

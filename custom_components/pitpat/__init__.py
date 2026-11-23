@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-from datetime import timedelta
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -12,7 +11,9 @@ from .coordinator import PitPatDataUpdateCoordinator
 from .const import (
     DATA_KEY_COORDINATOR,
     DOMAIN,
+    OPTIONS_KEY_TRACKING_UPDATE_INTERVAL,
     OPTIONS_KEY_UPDATE_INTERVAL,
+    TRACKING_UPDATE_INTERVAL_DEFAULT,
     UPDATE_INTERVAL_DEFAULT,
 )
 
@@ -30,6 +31,9 @@ _LOGGER = logging.getLogger(__name__)
 def _get_update_interval(config_entry: ConfigEntry):
     return config_entry.options.get(OPTIONS_KEY_UPDATE_INTERVAL, UPDATE_INTERVAL_DEFAULT)
 
+def _get_tracking_update_interval(config_entry: ConfigEntry):
+    return config_entry.options.get(OPTIONS_KEY_TRACKING_UPDATE_INTERVAL, TRACKING_UPDATE_INTERVAL_DEFAULT)
+
 async def async_setup(hass: HomeAssistant, config: dict):
     """Set up the component."""
     hass.data.setdefault(DOMAIN, {})
@@ -37,7 +41,9 @@ async def async_setup(hass: HomeAssistant, config: dict):
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up from a config entry."""
-    coordinator = PitPatDataUpdateCoordinator(hass, _get_update_interval(entry), entry)
+    coordinator = PitPatDataUpdateCoordinator(
+        hass, _get_update_interval(entry), _get_tracking_update_interval(entry), entry
+    )
 
     hass.data[DOMAIN][entry.entry_id] = {
         DATA_KEY_COORDINATOR: coordinator,
@@ -78,7 +84,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
 async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
     """Handle options update."""
     coordinator: PitPatDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id][DATA_KEY_COORDINATOR]
-    # DataUpdateCoordinator expects a timedelta, matching how it is set in
-    # PitPatDataUpdateCoordinator.__init__.
-    coordinator.update_interval = timedelta(minutes=_get_update_interval(config_entry))
+    coordinator.set_intervals(
+        _get_update_interval(config_entry), _get_tracking_update_interval(config_entry)
+    )
     _LOGGER.info("Coordinator settings updated")

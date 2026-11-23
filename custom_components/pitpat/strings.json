@@ -26,6 +26,7 @@
       "init": {
         "data": {
           "update_interval": "Update Interval (Minutes)",
+          "tracking_update_interval": "Update Interval While Tracking (Seconds)",
           "signal_lost_after_overdue": "Assume signal is lost after message is overdue by (Minutes)"
         }
       }
