@@ -112,6 +112,7 @@ class PitPatDataUpdateCoordinator(DataUpdateCoordinator[TCoordinatorData]):
                 new_interval,
             )
         self.update_interval = new_interval
+        _LOGGER.debug('Next poll in %s', new_interval)
 
     async def _async_ensure_ready(self):
         if not self.api_client:
